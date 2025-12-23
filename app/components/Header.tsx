@@ -57,11 +57,11 @@ export default function Header() {
           <div className="rounded-md bg-primary px-2 py-1 text-sm font-semibold text-primary-foreground">Z</div>
           <div>
             <div className="text-sm font-bold">zidbit news</div>
-            <div className="text-xs text-muted-foreground">Crypto headlines</div>
+            <div className="text-xs text-muted-foreground">headlines</div>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 cursor-pointer">
           <label className="sr-only">Theme</label>
           <Select value={theme} onValueChange={(t: Theme) => handleChange(t)}>
             <SelectTrigger className="w-30">
