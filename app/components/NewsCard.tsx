@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ExternalLink, MessageSquare } from 'lucide-react';
-import { useMemo } from 'react';
 import { NewsItem } from '@/types/news';
 
 const SafeHTML = dynamic(
@@ -15,15 +14,8 @@ const SafeHTML = dynamic(
 
 
 
-export default function NewsCard({ item }: { item: NewsItem }) {
-  const date = useMemo(() => {
-    if (!item.publishedAt) return "";
-    return new Date(item.publishedAt).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
-    });
-  }, [item.publishedAt]);
+export default function NewsCard({ item ,index}: { item: NewsItem, index: number }) {
+
 
   return (
     <Card className="w-full overflow-hidden hover:shadow-md transition">
@@ -31,6 +23,7 @@ export default function NewsCard({ item }: { item: NewsItem }) {
         <div className="relative w-full h-48 bg-linear-to-br from-gray-600 to-gray-800">
           <Image
             fill
+            loading={index < 8 ? 'eager':'lazy'}
             src={item.imageUrl}
             alt={item.title}
             className="object-cover"
@@ -85,7 +78,7 @@ export default function NewsCard({ item }: { item: NewsItem }) {
             <Badge variant="secondary" className="font-normal">
               {item.source}
             </Badge>
-            {date && <span>{date}</span>}
+            {item.publishedAt && <span>{`${item.publishedAt}`}</span>}
             {item.commentCount !== undefined && item.commentCount > 0 && (
               <span className="flex items-center gap-1">
                 <MessageSquare className="h-3 w-3" />

@@ -21,12 +21,12 @@ import { useSidebar } from "@/components/ui/sidebar"
 
 
 export default function Header() {
-  const { toggleSidebar } = useSidebar()
+  const { toggleSidebar, } = useSidebar()
  
 
   return (
-    <header className="bg-background sticky top-0 z-50 flex w-full items-center border-b">
-        <div className="flex h-(--header-height) w-full items-center gap-2 px-4">
+    <header className="bg-background sticky top-0 z-50 flex w-full items-center border-b ">
+        <div className="flex h-(--header-height) w-full items-center gap-2 px-4 ">
     <Button
           className="h-8 w-8"
           variant="ghost"
@@ -50,15 +50,13 @@ export default function Header() {
           </BreadcrumbList>
         </Breadcrumb>
 
-    
-     
-   
         <SearchForm className="w-full sm:ml-auto sm:w-auto" />
-            <div className="mx-auto flex max-w-4xl items-center justify-between gap-4 px-4 py-3">
-        <div className="flex items-center gap-3">
-          <div className="rounded-md bg-primary px-2 py-1 text-sm font-semibold text-primary-foreground">Z</div>
-          <div>
-            <div className="text-sm font-bold">zidbit news</div>
+            <div className="mx-auto flex max-w-4xl items-center justify-end  gap-4 px-4 py-3">
+        <div className="flex items-center gap-3 ">
+
+          <div className="">
+                      <div className="rounded-md bg-primary px-2 py-1 mx-2 text-sm font-semibold text-primary-foreground text-center">Z</div>
+            {/* <div className="text-sm font-bold">zidbit news</div> */}
             <div className="text-xs text-muted-foreground">headlines</div>
           </div>
         </div>

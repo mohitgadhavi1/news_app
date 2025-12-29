@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { fetchCryptoNews } from "../../../lib/mongodb";
+import { fetchCryptoNews } from "@/lib/newsService";
 
 export async function GET(request: Request) {
     try {

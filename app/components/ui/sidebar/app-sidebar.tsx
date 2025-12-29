@@ -3,7 +3,7 @@
 import * as React from "react"
 
 
-import { NavMain } from "@/app/components/nav-main"
+import { NavMain  } from "./nav-main"
 
 import {
   Sidebar,
@@ -35,6 +35,7 @@ import { NavUser } from "./nav-user"
 const navItems = [
   {
     title: "Categories",
+    icon: LifeBuoy, // Added icon for category
     url: "/categories",
     isActive: true,
     items: categories.map((c) => ({
@@ -47,7 +48,7 @@ const navItems = [
 const user= {
     name: "shadcn",
     email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
+    avatar: "",
   }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
