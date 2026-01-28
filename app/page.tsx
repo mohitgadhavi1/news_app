@@ -3,23 +3,18 @@
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/app/components/ui/sidebar/app-sidebar";
 import Header from "./components/Header";
-import dynamic from "next/dynamic";
-
-const NewsSection = dynamic(
-  () => import("./components/NewsSection").then((mod) => mod.default),
-  { ssr: true }
-);
+import NewsSection from "./components/NewsSection";
 
 interface HomeProps {
   searchParams: { [key: string]: string | string[] | undefined };
 }
 
-async function  Home(props: HomeProps)  {
+async function Home(props: HomeProps) {
   const query = await props.searchParams
 
   return (
     <div className="[--header-height:calc(--spacing(14))]">
-      <SidebarProvider className="flex flex-col">
+      <SidebarProvider defaultOpen={false} className="flex flex-col">
         <Header />
         <AppSidebar />
         <SidebarInset>

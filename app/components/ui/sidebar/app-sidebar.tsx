@@ -53,7 +53,7 @@ const user= {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
-    <Sidebar collapsible="icon" {...props} 
+    <Sidebar  collapsible="icon" {...props} 
       className="top-(--header-height) h-[calc(100svh-var(--header-height))]!"
     >
     
@@ -66,6 +66,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
            <SidebarFooter>
         <NavUser user={user} />
       </SidebarFooter>
+      <SidebarRail/>
     </Sidebar>
   )
 }

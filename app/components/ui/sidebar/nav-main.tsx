@@ -11,6 +11,7 @@ import {
   SidebarGroup,
   SidebarGroupLabel,
   SidebarMenu,
+  SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarMenuSub,
@@ -34,7 +35,7 @@ export function NavMain({
     }[]
   }[]
 }) {
-  
+
   return (
     <SidebarGroup>
       <SidebarGroupLabel>Categories</SidebarGroupLabel>
@@ -63,6 +64,7 @@ export function NavMain({
                           <span>{subItem.title}</span>
                         </a>
                       </SidebarMenuSubButton>
+                      <SidebarMenuBadge>0</SidebarMenuBadge>
                     </SidebarMenuSubItem>
                   ))}
                 </SidebarMenuSub>
@@ -71,9 +73,9 @@ export function NavMain({
           </Collapsible>
         ))}
       </SidebarMenu>
-      
-     
-     
+
+
+
     </SidebarGroup>
   )
 }
