@@ -1,0 +1,33 @@
+# Node.js
+/node_modules
+
+# Next.js build output
+/.next
+
+# Next.js static export
+/out
+
+# VS Code settings
+.vscode/
+
+# Log files
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+
+# dotenv environment variables file
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# Build output
+/build
+
+# Temporary files
+/.idea
+.DS_Store
+
+# Mac system files
+Thumbs.db
