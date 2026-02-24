@@ -1,0 +1,100 @@
+[
+    {
+        "name": "TechCrunch",
+        "url": "https://techcrunch.com/feed/",
+        "type": "RSS",
+        "cost": "Free",
+        "notes": "Startup funding, product launches, AI coverage"
+    },
+    {
+        "name": "The Verge",
+        "url": "https://www.theverge.com/rss/index.xml",
+        "type": "RSS",
+        "cost": "Free",
+        "notes": "Consumer tech, big tech policy"
+    },
+    {
+        "name": "Ars Technica",
+        "url": "http://feeds.arstechnica.com/arstechnica/index",
+        "type": "RSS",
+        "cost": "Free",
+        "notes": "Deep technical analysis, security, science"
+    },
+    {
+        "name": "Wired",
+        "url": "https://www.wired.com/feed/rss",
+        "type": "RSS",
+        "cost": "Free",
+        "notes": "Tech + culture, AI ethics, long-form"
+    },
+    {
+        "name": "Hacker News",
+        "url": "https://hacker-news.firebaseio.com/v0/",
+        "type": "API (Official Firebase API)",
+        "cost": "Free",
+        "notes": "Developer community news, startup discussions"
+    },
+    {
+        "name": "GitHub API (Trending/Repositories)",
+        "url": "https://api.github.com/",
+        "type": "API (REST)",
+        "cost": "Free (Rate limited)",
+        "notes": "Developer momentum, trending repositories"
+    },
+    {
+        "name": "InfoQ",
+        "url": "https://feed.infoq.com/",
+        "type": "RSS",
+        "cost": "Free",
+        "notes": "Architecture, DevOps, cloud engineering"
+    },
+    {
+        "name": "VentureBeat (AI Section)",
+        "url": "https://venturebeat.com/category/ai/feed/",
+        "type": "RSS",
+        "cost": "Free",
+        "notes": "Enterprise AI, funding news"
+    },
+    {
+        "name": "OpenAI Blog",
+        "url": "https://openai.com/blog/rss.xml",
+        "type": "RSS",
+        "cost": "Free",
+        "notes": "AI research updates and announcements"
+    },
+    {
+        "name": "Crunchbase News",
+        "url": "https://news.crunchbase.com/feed/",
+        "type": "RSS",
+        "cost": "Free",
+        "notes": "Startup funding and market movement"
+    },
+    {
+        "name": "Inc42",
+        "url": "https://inc42.com/feed/",
+        "type": "RSS",
+        "cost": "Free",
+        "notes": "Indian startup ecosystem coverage"
+    },
+    {
+        "name": "YourStory",
+        "url": "https://yourstory.com/feed",
+        "type": "RSS",
+        "cost": "Free",
+        "notes": "Indian startup and tech news"
+    },
+    {
+        "name": "GNews",
+        "url": "https://gnews.io/",
+        "type": "API",
+        "cost": "Free tier available / Paid plans",
+        "notes": "Aggregated news API"
+    },
+    {
+        "name": "NewsAPI",
+        "url": "https://newsapi.org/",
+        "type": "API",
+        "cost": "Free (development only) / Paid for production",
+        "notes": "Aggregated news API (rate limited on free plan)"
+    }
+]

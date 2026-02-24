@@ -1,33 +1,40 @@
-# Node.js
-/node_modules
+# Dependencies
+**/node_modules/
 
 # Next.js build output
-/.next
+web/.next/
+web/out/
+web/build/
 
-# Next.js static export
-/out
+# Node/TypeScript build output
+crons/dist/
 
-# VS Code settings
-.vscode/
-
-# Log files
-npm-debug.log
-yarn-debug.log
-yarn-error.log
-
-# dotenv environment variables file
+# Environment variables
 .env
 .env.local
-.env.development
-.env.test
-.env.production
+.env.development.local
+.env.test.local
+.env.production.local
+**/.env*
+!**/.env.example
 
-# Build output
-/build
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
 
-# Temporary files
-/.idea
+# IDEs and Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
 .DS_Store
-
-# Mac system files
 Thumbs.db
+
+# Database
+*.db
+*.sqlite

@@ -1,0 +1,48 @@
+TECH NEWS SOURCES LIST
+
+1.  TechCrunch URL: https://techcrunch.com/feed/ Type: RSS Cost: Free
+    Notes: Startup funding, product launches, AI coverage
+
+2.  The Verge URL: https://www.theverge.com/rss/index.xml Type: RSS
+    Cost: Free Notes: Consumer tech, big tech policy
+
+3.  Ars Technica URL: http://feeds.arstechnica.com/arstechnica/index
+    Type: RSS Cost: Free Notes: Deep technical analysis, security,
+    science
+
+4.  Wired URL: https://www.wired.com/feed/rss Type: RSS Cost: Free
+    Notes: Tech + culture, AI ethics, long-form
+
+5.  Hacker News URL: https://hacker-news.firebaseio.com/v0/ Type: API
+    (Official Firebase API) Cost: Free Notes: Developer community news,
+    startup discussions
+
+6.  GitHub API (Trending/Repositories) URL: https://api.github.com/
+    Type: API (REST) Cost: Free (Rate limited) Notes: Developer
+    momentum, trending repositories
+
+7.  InfoQ URL: https://feed.infoq.com/ Type: RSS Cost: Free Notes:
+    Architecture, DevOps, cloud engineering
+
+8.  VentureBeat (AI Section) URL:
+    https://venturebeat.com/category/ai/feed/ Type: RSS Cost: Free
+    Notes: Enterprise AI, funding news
+
+9.  OpenAI Blog URL: https://openai.com/blog/rss.xml Type: RSS Cost:
+    Free Notes: AI research updates and announcements
+
+10. Crunchbase News URL: https://news.crunchbase.com/feed/ Type: RSS
+    Cost: Free Notes: Startup funding and market movement
+
+11. Inc42 URL: https://inc42.com/feed/ Type: RSS Cost: Free Notes:
+    Indian startup ecosystem coverage
+
+12. YourStory URL: https://yourstory.com/feed Type: RSS Cost: Free
+    Notes: Indian startup and tech news
+
+13. GNews URL: https://gnews.io/ Type: API Cost: Free tier available /
+    Paid plans Notes: Aggregated news API
+
+14. NewsAPI URL: https://newsapi.org/ Type: API Cost: Free (development
+    only) / Paid for production Notes: Aggregated news API (rate limited
+    on free plan)
