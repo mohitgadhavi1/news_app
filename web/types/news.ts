@@ -5,8 +5,10 @@ export interface NewsItem {
     type?: string;
     title: string;
     summary: string;
+    content?: string;
     contentHtml?: string;
     url: string;
+    canonicalUrl?: string;
     publishedAt: Date | string | null;
     lastModified?: Date | string | null;
     imageUrl: string | null;

@@ -25,6 +25,7 @@ export interface CryptoNewsResult {
     id: string;
     title: string;
     summary: string;
+    content?: string;
     url: string;
     source: string;
     publishedAt: string | null;
@@ -33,7 +34,7 @@ export interface CryptoNewsResult {
 
 export async function fetchCryptoNews(limit = 12, skip = 0) {
     const db = await getDb();
-    const col = db.collection<CryptoNewsDocument>("news");
+    const col = db.collection<CryptoNewsDocument>("external_news");
 
     const [docs, total] = await Promise.all([
         col
@@ -55,7 +56,8 @@ function mapDocumentToResult(doc: CryptoNewsDocument): CryptoNewsResult {
     return {
         id: doc._id?.toString() ?? "",
         title: doc.title ?? "",
-        summary: doc.contentHtml ?? "",
+        summary: (doc as any).content ?? doc.contentHtml ?? "", // Safely grab content since it's mapped in backend
+        content: (doc as any).content ?? doc.contentHtml ?? "",
         url: doc.canonicalUrl ?? "",
         source: doc.source ?? "seeking-alpha",
         publishedAt: formatDate(doc.publishOn),

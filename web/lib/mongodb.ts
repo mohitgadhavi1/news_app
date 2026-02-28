@@ -12,7 +12,7 @@ export async function getDb(): Promise<Db> {
     if (cachedDb && cachedClient) return cachedDb;
 
     const uri = process.env.MONGODB_URI || "";
-    const dbName = process.env.MONGODB_DB || "seeking-alpha";
+    const dbName = process.env.MONGODB_DB || "news";
 
     if (!uri) {
         console.warn("MONGODB_URI not set — MongoDB access will fail in runtime");

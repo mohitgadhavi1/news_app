@@ -11,11 +11,11 @@ interface NewsSectionProps {
 export default async function NewsSection({ searchParams = {} }: NewsSectionProps) {
   // Safely get page from search params
   const pageParam = searchParams.page;
-  const page = pageParam 
+  const page = pageParam
     ? Number(Array.isArray(pageParam) ? pageParam[0] : pageParam)
     : 1;
-    
- 
+
+
   let newsData;
   try {
     newsData = await newsFetchServe(page);
@@ -62,7 +62,7 @@ export default async function NewsSection({ searchParams = {} }: NewsSectionProp
               No news available — ensure MongoDB is configured.
             </div>
           ) : (
-            news.map((n: NewsItem,index) => <NewsCard key={n.id} item={n} index={index} />)
+            news.map((n: any, index: number) => <NewsCard key={n.id} item={n} index={index} />)
           )}
         </section>
         {totalPages > 1 && (
