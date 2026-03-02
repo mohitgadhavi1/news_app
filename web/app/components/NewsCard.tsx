@@ -106,7 +106,7 @@ export default function NewsCard({ item, index, categorySlug = "all" }: { item: 
                   <Badge variant="secondary" className="font-normal capitalize truncate max-w-[100px]">
                     {item.source}
                   </Badge>
-                  {item.publishOn && <span className="truncate">{new Date(item.publishOn).toLocaleDateString()}</span>}
+                  {item.publishedAt && <span className="truncate">{new Date(item.publishedAt).toLocaleDateString()}</span>}
                 </div>
                 {item.commentCount !== undefined && item.commentCount > 0 && (
                   <span className="flex items-center gap-1">
