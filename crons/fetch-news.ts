@@ -1,22 +1,21 @@
-import axios from 'axios';
 import { MongoClient } from 'mongodb';
-import { classifyNewsText, CATEGORIES } from './newsCategoryGeneration.js';
+import { fetchFromSource } from './apis.js';
+import { NewsItem } from './types.js';
 
 const MONGODB_URI = process.env.MONGODB_URI;
-const RAPIDAPI_KEY = process.env.RAPIDAPI_KEY;
 
-if (!MONGODB_URI || !RAPIDAPI_KEY) {
-    console.error('❌ Missing env variables');
+if (!MONGODB_URI) {
+    console.error('❌ Missing MONGODB_URI env variable');
     process.exit(1);
 }
 
-export async function fetchAndStoreNews() {
+export async function fetchAndStoreNews(sourceId: string) {
     const client = new MongoClient(MONGODB_URI as string);
 
     try {
         await client.connect();
-        const db = client.db('seeking-alpha');
-        const collection = db.collection('news');
+        const db = client.db('news');
+        const collection = db.collection('external_news');
 
         // Performance index only
         await collection.createIndex(
@@ -24,74 +23,20 @@ export async function fetchAndStoreNews() {
             { unique: true, background: true }
         );
 
-        const response = await axios.get(
-            'https://seeking-alpha.p.rapidapi.com/news/v2/list?size=20&category=market-news%3A%3Aall&number=1',
-            {
-                headers: {
-                    'x-rapidapi-key': RAPIDAPI_KEY,
-                    'x-rapidapi-host': 'seeking-alpha.p.rapidapi.com',
-                },
-            }
-        );
+        console.log(`⏳ Fetching news from source: ${sourceId}...`);
+        const rawArticles = await fetchFromSource(sourceId);
 
-        const newsData = response.data?.data;
-
-        if (!Array.isArray(newsData)) {
-            console.log('⚠️ No valid articles returned.');
+        if (!Array.isArray(rawArticles) || rawArticles.length === 0) {
+            console.log(`⚠️ No valid articles returned from ${sourceId}.`);
             return;
         }
 
-        // Add error handling for individual articles
-        const formatted = await Promise.all(newsData.map(async (article) => {
-            try {
-                const categoryResult = await classifyNewsText(
-                    (article.attributes?.title || '') + ' ' + (article.attributes?.content || '')
-                );
-
-                // Safer ticker extraction
-                const tickers = article.relationships?.sentiments?.data?.primaryTickers?.data;
-
-                // Find the full category object meta
-                const categoryInfo = CATEGORIES.find(c => c.name === categoryResult.categoryName);
-
-                return {
-                    source: 'seeking-alpha',
-                    articleId: article.id,
-                    type: article.type,
-                    title: article.attributes?.title,
-                    content: article.attributes?.content,
-                    publishOn: new Date(article.attributes?.publishOn),
-                    lastModified: new Date(article.attributes?.lastModified),
-                    status: article.attributes?.status,
-                    isExclusive: article.attributes?.isExclusive,
-                    metered: article.attributes?.metered,
-                    commentCount: article.attributes?.commentCount,
-                    images: {
-                        primary: article.attributes?.gettyImageUrl,
-                        variants: article.links?.schemaImage ?? [],
-                    },
-                    canonicalUrl: article.links?.canonical,
-                    tickers: Array.isArray(tickers) ? tickers.map((t: { id: string }) => t.id) : [],
-                    category: categoryInfo ? {
-                        ...categoryInfo,
-                        categoryName: categoryResult.categoryName,
-                        confidence: categoryResult.confidence,
-                        reasoning: categoryResult.reasoning,
-                    } : undefined,
-                };
-            } catch (err) {
-                console.error(`⚠️ Failed to process article ${article.id}:`, err);
-                return null;
-            }
-        }));
-
-        // Filter out failed articles
-        const validArticles = formatted.filter(article => article !== null);
+        const validArticles = rawArticles.filter(article => article !== null);
 
         if (validArticles.length) {
             const bulkOps = validArticles.map(article => ({
                 updateOne: {
-                    filter: { articleId: article.articleId },
+                    filter: { articleId: article!.articleId },
                     update: {
                         $set: {
                             ...article,
@@ -108,7 +53,7 @@ export async function fetchAndStoreNews() {
             const result = await collection.bulkWrite(bulkOps, { ordered: false });
 
             console.log(
-                `📰 Upserted: ${result.upsertedCount}, Updated: ${result.modifiedCount}, Failed: ${formatted.length - validArticles.length}`
+                `📰 [${sourceId}] Upserted: ${result.upsertedCount}, Updated: ${result.modifiedCount}`
             );
         }
 
@@ -120,12 +65,10 @@ export async function fetchAndStoreNews() {
             publishOn: { $lt: cutoff },
         });
 
-        console.log(`🧹 Deleted ${deletedCount} old articles`);
+        console.log(`🧹 [${sourceId}] Deleted ${deletedCount} old articles based on cutoff`);
     } catch (err) {
-        console.error('❌ Error:', err);
+        console.error(`❌ Error fetching/storing news for ${sourceId}:`, err);
     } finally {
         await client.close();
     }
 }
-
-// fetchAndStoreNews(); // Removed to allow control by runner

@@ -1,5 +1,6 @@
 "use client"
 
+import React from "react"
 import { ChevronRight, type LucideIcon } from "lucide-react"
 
 import {
@@ -35,47 +36,38 @@ export function NavMain({
     }[]
   }[]
 }) {
+  const [counts, setCounts] = React.useState<Record<string, number>>({})
+
+  React.useEffect(() => {
+    fetch("/api/categories/counts")
+      .then((res) => res.json())
+      .then((data) => {
+        if (!data.error) {
+          setCounts(data)
+        }
+      })
+      .catch((err) => console.error("Error fetching category counts:", err))
+  }, [])
 
   return (
     <SidebarGroup>
       <SidebarGroupLabel>Categories</SidebarGroupLabel>
       <SidebarMenu>
-        {items.map((item) => (
-          <Collapsible
-            key={item.title}
-            asChild
-            defaultOpen={item.isActive}
-            className="group/collapsible"
-          >
-            <SidebarMenuItem>
-              <CollapsibleTrigger asChild>
-                <SidebarMenuButton tooltip={item.title}>
-                  {item.icon && <item.icon />}
-                  <span>{item.title}</span>
-                  <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+        {items.map((group) => (
+          <React.Fragment key={group.title}>
+            {group.items?.map((item) => (
+              <SidebarMenuItem key={item.title}>
+                <SidebarMenuButton asChild tooltip={item.title}>
+                  <a href={item.url}>
+                    <span>{item.title}</span>
+                  </a>
                 </SidebarMenuButton>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <SidebarMenuSub>
-                  {item.items?.map((subItem) => (
-                    <SidebarMenuSubItem key={subItem.title}>
-                      <SidebarMenuSubButton asChild>
-                        <a href={subItem.url}>
-                          <span>{subItem.title}</span>
-                        </a>
-                      </SidebarMenuSubButton>
-                      <SidebarMenuBadge>0</SidebarMenuBadge>
-                    </SidebarMenuSubItem>
-                  ))}
-                </SidebarMenuSub>
-              </CollapsibleContent>
-            </SidebarMenuItem>
-          </Collapsible>
+                <SidebarMenuBadge>{counts[item.title] ?? 0}</SidebarMenuBadge>
+              </SidebarMenuItem>
+            ))}
+          </React.Fragment>
         ))}
       </SidebarMenu>
-
-
-
     </SidebarGroup>
   )
 }

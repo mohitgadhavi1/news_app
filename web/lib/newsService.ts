@@ -32,24 +32,49 @@ export interface CryptoNewsResult {
     imageUrl: string | null;
 }
 
-export async function fetchCryptoNews(limit = 12, skip = 0) {
+export async function fetchCryptoNews(limit = 12, skip = 0, categoryName?: string) {
     const db = await getDb();
     const col = db.collection<CryptoNewsDocument>("external_news");
 
+    const query = categoryName ? { "category.categoryName": categoryName } : {};
+
     const [docs, total] = await Promise.all([
         col
-            .find({})
+            .find(query)
             .sort({ publishOn: -1 })
             .skip(skip)
             .limit(limit)
             .toArray(),
-        col.countDocuments({})
+        col.countDocuments(query)
     ]);
 
     return {
         news: docs.map(mapDocumentToResult),
         total
     };
+}
+
+export async function fetchCategoryCounts() {
+    const db = await getDb();
+    const col = db.collection<CryptoNewsDocument>("external_news");
+
+    const counts = await col.aggregate([
+        { $match: { "category.categoryName": { $exists: true } } },
+        { $group: { _id: "$category.categoryName", count: { $sum: 1 } } }
+    ]).toArray();
+
+    return counts.reduce((acc, curr) => {
+        acc[curr._id] = curr.count;
+        return acc;
+    }, {} as Record<string, number>);
+}
+
+export async function fetchArticleById(id: string) {
+    const db = await getDb();
+    const col = db.collection<CryptoNewsDocument>("external_news");
+
+    const doc = await col.findOne({ _id: new ObjectId(id) });
+    return doc ? mapDocumentToResult(doc) : null;
 }
 
 function mapDocumentToResult(doc: CryptoNewsDocument): CryptoNewsResult {

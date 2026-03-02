@@ -1,5 +1,6 @@
 [
     {
+        "id": "1",
         "name": "TechCrunch",
         "url": "https://techcrunch.com/feed/",
         "type": "RSS",
@@ -7,6 +8,7 @@
         "notes": "Startup funding, product launches, AI coverage"
     },
     {
+        "id": "2",
         "name": "The Verge",
         "url": "https://www.theverge.com/rss/index.xml",
         "type": "RSS",
@@ -14,6 +16,7 @@
         "notes": "Consumer tech, big tech policy"
     },
     {
+        "id": "3",
         "name": "Ars Technica",
         "url": "http://feeds.arstechnica.com/arstechnica/index",
         "type": "RSS",
@@ -21,6 +24,7 @@
         "notes": "Deep technical analysis, security, science"
     },
     {
+        "id": "4",
         "name": "Wired",
         "url": "https://www.wired.com/feed/rss",
         "type": "RSS",
@@ -28,6 +32,7 @@
         "notes": "Tech + culture, AI ethics, long-form"
     },
     {
+        "id": "5",
         "name": "Hacker News",
         "url": "https://hacker-news.firebaseio.com/v0/",
         "type": "API (Official Firebase API)",
@@ -35,6 +40,7 @@
         "notes": "Developer community news, startup discussions"
     },
     {
+        "id": "6",
         "name": "GitHub API (Trending/Repositories)",
         "url": "https://api.github.com/",
         "type": "API (REST)",
@@ -42,6 +48,7 @@
         "notes": "Developer momentum, trending repositories"
     },
     {
+        "id": "7",
         "name": "InfoQ",
         "url": "https://feed.infoq.com/",
         "type": "RSS",
@@ -49,6 +56,7 @@
         "notes": "Architecture, DevOps, cloud engineering"
     },
     {
+        "id": "8",
         "name": "VentureBeat (AI Section)",
         "url": "https://venturebeat.com/category/ai/feed/",
         "type": "RSS",
@@ -56,6 +64,7 @@
         "notes": "Enterprise AI, funding news"
     },
     {
+        "id": "9",
         "name": "OpenAI Blog",
         "url": "https://openai.com/blog/rss.xml",
         "type": "RSS",
@@ -63,6 +72,7 @@
         "notes": "AI research updates and announcements"
     },
     {
+        "id": "10",
         "name": "Crunchbase News",
         "url": "https://news.crunchbase.com/feed/",
         "type": "RSS",
@@ -70,6 +80,7 @@
         "notes": "Startup funding and market movement"
     },
     {
+        "id": "11",
         "name": "Inc42",
         "url": "https://inc42.com/feed/",
         "type": "RSS",
@@ -77,6 +88,7 @@
         "notes": "Indian startup ecosystem coverage"
     },
     {
+        "id": "12",
         "name": "YourStory",
         "url": "https://yourstory.com/feed",
         "type": "RSS",
@@ -84,6 +96,7 @@
         "notes": "Indian startup and tech news"
     },
     {
+        "id": "13",
         "name": "GNews",
         "url": "https://gnews.io/",
         "type": "API",
@@ -91,6 +104,7 @@
         "notes": "Aggregated news API"
     },
     {
+        "id": "14",
         "name": "NewsAPI",
         "url": "https://newsapi.org/",
         "type": "API",

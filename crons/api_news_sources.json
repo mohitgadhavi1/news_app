@@ -1,0 +1,308 @@
+[
+    {
+        "id": "1",
+        "name": "GNews",
+        "base_url": "https://gnews.io/api/v4",
+        "endpoints": {
+            "search": {
+                "url": "https://gnews.io/api/v4/search",
+                "description": "Search articles by keyword with advanced filtering options."
+            },
+            "top_headlines": {
+                "url": "https://gnews.io/api/v4/top-headlines",
+                "description": "Fetch trending headlines across 9 categories based on Google News rankings."
+            }
+        },
+        "authentication": {
+            "method": "query_param",
+            "query_param": "apikey",
+            "value": "[GNEWS_API_KEY]"
+        },
+        "type": "API",
+        "cost": "Free tier available / Paid plans",
+        "free_tier_limits": {
+            "requests_per_day": 100,
+            "max_articles_per_request": 10,
+            "article_availability_delay": "12 hours",
+            "historical_data": "30 days",
+            "cors": "localhost only",
+            "commercial_use": false
+        },
+        "notes": "Aggregated news API. Free plan is for non-commercial, development and testing purposes only. Articles have a 12-hour delay on the free tier. Full article content is returned (unlike NewsAPI).",
+        "conditions": {
+            "search": {
+                "q": "Keyword or phrase to search for. Supports AND, OR, NOT, and \"exact phrase\".",
+                "lang": "2-letter language code. e.g. en | fr | de | ar | zh",
+                "country": "2-letter country code. e.g. us | gb | in",
+                "max": "Number of articles to return. Default 10, max 10 on free tier.",
+                "in": "Restrict search to: title | description | content",
+                "nullable": "Fields that can be null: image | description | content",
+                "from": "Oldest article date in ISO 8601. e.g. 2026-02-01T00:00:00Z",
+                "to": "Newest article date in ISO 8601. e.g. 2026-02-28T23:59:59Z",
+                "sortby": "publishedAt | relevance",
+                "page": "Page number for pagination.",
+                "expand": "Set to content to retrieve full article content (paid plans only).",
+                "apikey": "[GNEWS_API_KEY]"
+            },
+            "top_headlines": {
+                "topic": "general | world | nation | business | technology | entertainment | sports | science | health",
+                "lang": "2-letter language code. e.g. en | fr | de",
+                "country": "2-letter country code. e.g. us | gb | in",
+                "max": "Number of articles to return. Default 10, max 10 on free tier.",
+                "nullable": "Fields that can be null: image | description | content",
+                "from": "Oldest article date in ISO 8601.",
+                "to": "Newest article date in ISO 8601.",
+                "sortby": "publishedAt | relevance",
+                "page": "Page number for pagination.",
+                "apikey": "[GNEWS_API_KEY]"
+            }
+        },
+        "available_fields": {
+            "totalArticles": 10,
+            "articles": [
+                {
+                    "title": "Example Title",
+                    "description": "Example description of the article.",
+                    "content": "Full article content (truncated to first 5 sentences on free tier)...",
+                    "url": "https://example.com/article",
+                    "image": "https://example.com/image.jpg",
+                    "publishedAt": "2026-02-24T00:00:00Z",
+                    "source": {
+                        "name": "Example Source Name",
+                        "url": "https://example.com"
+                    }
+                }
+            ]
+        }
+    },
+    {
+        "id": "2",
+        "name": "NewsAPI",
+        "base_url": "https://newsapi.org/v2",
+        "endpoints": {
+            "everything": {
+                "url": "https://newsapi.org/v2/everything",
+                "description": "Search through millions of articles from 150,000+ sources. Best for article discovery."
+            },
+            "top_headlines": {
+                "url": "https://newsapi.org/v2/top-headlines",
+                "description": "Live breaking headlines by country, category, or source."
+            },
+            "sources": {
+                "url": "https://newsapi.org/v2/top-headlines/sources",
+                "description": "Returns available news sources to use in other endpoints."
+            }
+        },
+        "authentication": {
+            "method": "query_param_or_header",
+            "query_param": "apiKey",
+            "header": "X-Api-Key",
+            "value": "[NEWSAPI_KEY]"
+        },
+        "type": "API",
+        "cost": "Free (development/localhost only) / Paid for production",
+        "free_tier_limits": {
+            "requests_per_day": 100,
+            "max_articles_per_request": 100,
+            "historical_data": "1 month",
+            "commercial_use": false,
+            "production_use": false,
+            "full_article_content": false
+        },
+        "notes": "Aggregated news API. Free plan is strictly for local development and testing — cannot be used in staging or production. Full article body is not returned; only a truncated content snippet.",
+        "conditions": {
+            "everything": {
+                "q": "Keywords or phrase to search for. Supports AND, OR, NOT, +, - and \"exact phrase\". Max 500 chars.",
+                "searchIn": "Restrict search to: title | description | content",
+                "sources": "Comma-separated source IDs (max 20). e.g. bbc-news,cnn",
+                "domains": "Comma-separated domains to restrict results. e.g. bbc.co.uk,techcrunch.com",
+                "excludeDomains": "Comma-separated domains to exclude.",
+                "from": "2026-02-24",
+                "to": "2026-02-28",
+                "language": "2-letter language code. e.g. en | de | fr | ar | zh",
+                "sortBy": "relevancy | popularity | publishedAt",
+                "pageSize": "Number of results per page. Default 20, max 100.",
+                "page": "Page number for pagination."
+            },
+            "top_headlines": {
+                "country": "2-letter country code. e.g. us | gb | in. Cannot be mixed with sources.",
+                "category": "business | entertainment | general | health | science | sports | technology. Cannot be mixed with sources.",
+                "sources": "Comma-separated source IDs. Cannot be mixed with country or category.",
+                "q": "Keywords to filter headlines.",
+                "pageSize": "Max 100.",
+                "page": "Page number for pagination."
+            },
+            "sources": {
+                "category": "Filter sources by category.",
+                "language": "Filter sources by language.",
+                "country": "Filter sources by country."
+            }
+        },
+        "available_fields": {
+            "status": "ok",
+            "totalResults": 178,
+            "articles": [
+                {
+                    "source": {
+                        "id": "example-id",
+                        "name": "Example Source"
+                    },
+                    "author": "Example Author",
+                    "title": "Example headline",
+                    "description": "Example snippet from the article",
+                    "url": "https://example.com",
+                    "urlToImage": "https://example.com/image.jpg",
+                    "publishedAt": "2026-02-24T00:00:00Z",
+                    "content": "Truncated article content (max ~200 chars on free plan)..."
+                }
+            ]
+        }
+    },
+    {
+        "id": "3",
+        "name": "seeking-alpha",
+        "base_url": "https://seeking-alpha.p.rapidapi.com",
+        "endpoints": {
+            "news_list": {
+                "url": "https://seeking-alpha.p.rapidapi.com/news/v2/list",
+                "description": "List news articles by category (market news, earnings, crypto, etc.). Primary endpoint for news feed."
+            },
+            "news_get_details": {
+                "url": "https://seeking-alpha.p.rapidapi.com/news/v2/get-details",
+                "description": "Get full details of a single news item by its ID."
+            },
+            "articles_list": {
+                "url": "https://seeking-alpha.p.rapidapi.com/articles/v2/list",
+                "description": "List analysis articles by category (latest, trending, editors picks, etc.)."
+            },
+            "articles_get_details": {
+                "url": "https://seeking-alpha.p.rapidapi.com/articles/v2/get-details",
+                "description": "Get full content and details of a single analysis article by ID."
+            },
+            "symbols_get_summary": {
+                "url": "https://seeking-alpha.p.rapidapi.com/symbols/get-summary",
+                "description": "Get summary data for a ticker symbol (price, ratings, market cap, etc.)."
+            },
+            "symbols_get_news": {
+                "url": "https://seeking-alpha.p.rapidapi.com/symbols/get-news",
+                "description": "Get news articles related to a specific ticker symbol."
+            },
+            "symbols_get_analysis": {
+                "url": "https://seeking-alpha.p.rapidapi.com/symbols/get-analysis",
+                "description": "Get analyst articles related to a specific ticker symbol."
+            },
+            "market_get_movers": {
+                "url": "https://seeking-alpha.p.rapidapi.com/market/get-movers",
+                "description": "Get top market movers (gainers/losers) for the day."
+            },
+            "market_get_trending": {
+                "url": "https://seeking-alpha.p.rapidapi.com/market/get-trending",
+                "description": "Get trending tickers and topics on Seeking Alpha."
+            }
+        },
+        "authentication": {
+            "method": "headers",
+            "headers": {
+                "x-rapidapi-key": "[RAPIDAPI_KEY]",
+                "x-rapidapi-host": "seeking-alpha.p.rapidapi.com"
+            }
+        },
+        "type": "API",
+        "cost": "Freemium via RapidAPI — Free tier available / Paid plans for higher usage",
+        "free_tier_limits": {
+            "requests_per_month": 500,
+            "rate_limit": "Shared RapidAPI rate limit",
+            "overage_fee": "$0.01 per additional request beyond free quota",
+            "credit_card_required": true,
+            "note": "RapidAPI freemium plans require a credit card on file to handle potential overages."
+        },
+        "notes": "Financial news and analysis API sourced from Seeking Alpha — covers market news, earnings, stock analysis, and ticker data. Finance-focused (not general news). Responses use a JSON:API-style structure with data in 'attributes' and relationships in 'relationships' objects. Free tier provides 500 requests/month via RapidAPI.",
+        "conditions": {
+            "news_list": {
+                "size": "Number of items to return per page. Default 20, max 40.",
+                "number": "Page number for pagination. Default 1.",
+                "category": "News category filter. Options: market-news::all | market-news::top-news | market-news::on-the-move | market-news::market-pulse | market-news::notable-calls | market-news::buybacks | market-news::commodities | market-news::crypto | market-news::issuance | market-news::global | market-news::dividend-ideas | market-news::earnings | market-news::spacs",
+                "since": "Unix timestamp — return articles published after this date.",
+                "until": "Unix timestamp — return articles published before this date."
+            },
+            "news_get_details": {
+                "id": "News item ID (from news/v2/list response)."
+            },
+            "articles_list": {
+                "category": "Article category. Options: latest-articles | editors-picks | stock-ideas | dividends | etfs | macro-economy | earnings | technology | energy | financial-services | healthcare",
+                "size": "Number of results per page. Default 20.",
+                "number": "Page number. Default 1.",
+                "since": "Unix timestamp lower bound.",
+                "until": "Unix timestamp upper bound."
+            },
+            "symbols_get_summary": {
+                "symbols": "Comma-separated ticker symbols. e.g. AAPL,MSFT,TSLA"
+            },
+            "symbols_get_news": {
+                "id": "Ticker symbol. e.g. AAPL",
+                "size": "Number of items per page.",
+                "number": "Page number."
+            },
+            "market_get_movers": {
+                "category": "Options: gainers | losers | most-active",
+                "country": "Country filter. Default: us"
+            }
+        },
+        "available_fields": {
+            "data": [
+                {
+                    "id": "1234567",
+                    "type": "news",
+                    "attributes": {
+                        "publishOn": "2026-02-24T09:30:00-05:00",
+                        "title": "Example Market News Headline",
+                        "isLockedPro": false,
+                        "isPaywalled": false,
+                        "commentCount": 12,
+                        "gettyImageUrl": "https://static.seekingalpha.com/cdn/s3/uploads/getty_images/example.jpg",
+                        "themes": {
+                            "example-theme": {
+                                "title": "Example Theme",
+                                "slug": "example-theme"
+                            }
+                        },
+                        "structuredInsights": null,
+                        "videoPreviewUrl": null,
+                        "videoDuration": null
+                    },
+                    "relationships": {
+                        "author": {
+                            "data": {
+                                "id": "12345",
+                                "type": "author"
+                            }
+                        },
+                        "primaryTickers": {
+                            "data": [
+                                {
+                                    "id": "146",
+                                    "type": "tag"
+                                }
+                            ]
+                        },
+                        "secondaryTickers": {
+                            "data": []
+                        },
+                        "sentiments": {
+                            "data": []
+                        }
+                    }
+                }
+            ],
+            "meta": {
+                "page": {
+                    "title": "Market News",
+                    "description": "Latest market news from Seeking Alpha",
+                    "pageNumber": 1,
+                    "pageSize": 20,
+                    "totalPages": 50
+                }
+            }
+        }
+    }
+]

@@ -13,12 +13,12 @@ interface NewsFetchResult {
     skip: number;
 }
 
-export async function newsFetchServe(page: number): Promise<NewsFetchResult> {
+export async function newsFetchServe(page: number, categoryName?: string): Promise<NewsFetchResult> {
     const skip = (page - 1) * ITEMS_PER_PAGE;
 
 
     // ✅ Let errors throw naturally for Next.js error boundaries to catch
-    const result = await fetchCryptoNews(ITEMS_PER_PAGE, skip);
+    const result = await fetchCryptoNews(ITEMS_PER_PAGE, skip, categoryName);
 
     const totalPages = Math.ceil(result.total / ITEMS_PER_PAGE);
 

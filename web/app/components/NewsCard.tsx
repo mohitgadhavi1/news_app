@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from 'react';
 import dynamic from 'next/dynamic';
+import Link from 'next/link';
 import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -13,13 +14,23 @@ const SafeHTML = dynamic(
   { ssr: false }
 );
 
-export default function NewsCard({ item, index }: { item: NewsItem, index: number }) {
+export default function NewsCard({ item, index, categorySlug = "all" }: { item: NewsItem, index: number, categorySlug?: string }) {
   const [isFlipped, setIsFlipped] = useState(false);
+  const [imgError, setImgError] = useState(false);
 
   const primaryImage = item.images?.primary || item.imageUrl;
   const officialUrl = item.canonicalUrl || item.url || "#";
   const previewText = item.summary || item.content || "";
   const fullText = item.content || item.summary || "No full content available.";
+
+  const initials = item.title
+    .replace(/[0-9]/g, '')
+    .trim()
+    .split(/\s+/)
+    .filter(word => word.length > 0)
+    .slice(0, 2)
+    .map(word => word[0].toUpperCase())
+    .join('');
 
   return (
     <div
@@ -30,17 +41,22 @@ export default function NewsCard({ item, index }: { item: NewsItem, index: numbe
 
         {/* Front of Card */}
         <Card className="absolute inset-0 w-full h-full overflow-hidden hover:shadow-md transition flex flex-col [backface-visibility:hidden]">
-          {primaryImage && (
-            <div className="relative w-full h-48 bg-linear-to-br from-gray-600 to-gray-800 shrink-0">
+          <div className="relative w-full h-48 bg-linear-to-br from-gray-600 to-gray-800 shrink-0 flex items-center justify-center">
+            {primaryImage && !imgError ? (
               <Image
                 fill
                 loading={index < 8 ? 'eager' : 'lazy'}
                 src={primaryImage}
                 alt={item.title}
                 className="object-cover"
+                onError={() => setImgError(true)}
               />
-            </div>
-          )}
+            ) : (
+              <div className="text-5xl font-bold text-white/40 select-none tracking-tighter">
+                {initials}
+              </div>
+            )}
+          </div>
 
           <CardHeader className="pb-2">
             <div className="flex items-start justify-between gap-2">
@@ -122,21 +138,33 @@ export default function NewsCard({ item, index }: { item: NewsItem, index: numbe
             <div className="text-xs text-muted-foreground">
               Click to flip back
             </div>
-            <Button
-              variant="default"
-              size="sm"
-              asChild
-              onClick={(e) => e.stopPropagation()} // Prevent card flip when clicking the button
-            >
-              <a
-                href={officialUrl}
-                target="_blank"
-                rel="noopener noreferrer"
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                asChild
+                onClick={(e) => e.stopPropagation()}
               >
-                Read Original
-                <ExternalLink className="ml-2 h-4 w-4" />
-              </a>
-            </Button>
+                <Link href={`/category/${categorySlug}/article/${item.id}`}>
+                  View Details
+                </Link>
+              </Button>
+              <Button
+                variant="default"
+                size="sm"
+                asChild
+                onClick={(e) => e.stopPropagation()}
+              >
+                <a
+                  href={officialUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Original
+                  <ExternalLink className="ml-1.5 h-3.5 w-3.5" />
+                </a>
+              </Button>
+            </div>
           </div>
         </Card>
 

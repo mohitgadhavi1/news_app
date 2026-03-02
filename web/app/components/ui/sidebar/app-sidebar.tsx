@@ -40,7 +40,7 @@ const navItems = [
     isActive: true,
     items: categories.map((c) => ({
       title: c.name,
-      url: `/category/${c.name.toLowerCase().replace(/\s+/g, "-")}`,
+      url: `/category/${c.slug}`,
     })),
   },
 ]

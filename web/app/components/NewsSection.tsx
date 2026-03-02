@@ -5,10 +5,12 @@ import { newsFetchServe } from "@/hooks/newsFetchServe";
 
 interface NewsSectionProps {
   searchParams?: { [key: string]: string | string[] | undefined };
+  categoryName?: string;
+  categorySlug?: string;
 }
 
 // Server Component for News Section with Pagination
-export default async function NewsSection({ searchParams = {} }: NewsSectionProps) {
+export default async function NewsSection({ searchParams = {}, categoryName, categorySlug }: NewsSectionProps) {
   // Safely get page from search params
   const pageParam = searchParams.page;
   const page = pageParam
@@ -18,7 +20,7 @@ export default async function NewsSection({ searchParams = {} }: NewsSectionProp
 
   let newsData;
   try {
-    newsData = await newsFetchServe(page);
+    newsData = await newsFetchServe(page, categoryName);
   } catch {
     return (
       <div className="min-h-screen bg-background p-4 sm:p-6 lg:p-8 flex items-center justify-center">
@@ -41,7 +43,7 @@ export default async function NewsSection({ searchParams = {} }: NewsSectionProp
     <div className="min-h-screen bg-background p-4 sm:p-6 lg:p-8">
       <div className="mx-auto w-full max-w-7xl">
         <div className="mb-8">
-          <h1 className="text-3xl sm:text-4xl font-bold">News</h1>
+          <h1 className="text-3xl sm:text-4xl font-bold">{categoryName ?? "News"}</h1>
           <p className="mt-2 text-sm sm:text-base text-muted-foreground">
             Latest financial headlines from around the world
           </p>
@@ -62,7 +64,14 @@ export default async function NewsSection({ searchParams = {} }: NewsSectionProp
               No news available — ensure MongoDB is configured.
             </div>
           ) : (
-            news.map((n: any, index: number) => <NewsCard key={n.id} item={n} index={index} />)
+            news.map((n: any, index: number) => (
+              <NewsCard
+                key={n.id}
+                item={n}
+                index={index}
+                categorySlug={categorySlug ?? "all"}
+              />
+            ))
           )}
         </section>
         {totalPages > 1 && (

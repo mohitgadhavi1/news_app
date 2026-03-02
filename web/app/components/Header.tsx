@@ -15,6 +15,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { useSidebar } from "@/components/ui/sidebar"
+import Link from "next/link"
 
 
 
@@ -22,12 +23,12 @@ import { useSidebar } from "@/components/ui/sidebar"
 
 export default function Header() {
   const { toggleSidebar, } = useSidebar()
- 
+
 
   return (
     <header className="bg-background sticky top-0 z-50 flex w-full items-center border-b ">
-        <div className="flex h-(--header-height) w-full items-center gap-2 px-4 ">
-    <Button
+      <div className="flex h-(--header-height) w-full items-center gap-2 px-4 ">
+        <Button
           className="h-8 w-8"
           variant="ghost"
           size="icon"
@@ -35,7 +36,7 @@ export default function Header() {
         >
           <SidebarIcon />
         </Button>
-           <Separator orientation="vertical" className="mr-2 h-4" />
+        <Separator orientation="vertical" className="mr-2 h-4" />
         <Breadcrumb className="hidden sm:block">
           <BreadcrumbList>
             <BreadcrumbItem>
@@ -51,19 +52,21 @@ export default function Header() {
         </Breadcrumb>
 
         <SearchForm className="w-full sm:ml-auto sm:w-auto" />
-            <div className="mx-auto flex max-w-4xl items-center justify-end  gap-4 px-4 py-3">
-        <div className="flex items-center gap-3 ">
+        <div className="mx-auto flex max-w-4xl items-center justify-end  gap-4 px-4 py-3">
+          <div className="flex items-center gap-3 ">
 
-          <div className="">
-                      <div className="rounded-md bg-primary px-2 py-1 mx-2 text-sm font-semibold text-primary-foreground text-center">Z</div>
-            {/* <div className="text-sm font-bold">zidbit news</div> */}
-            <div className="text-xs text-muted-foreground">headlines</div>
+            <Link href="/" className="hover:opacity-80 transition-opacity">
+              <div className="">
+                <div className="rounded-md bg-primary px-2 py-0.5 mx-2 text-sm font-semibold text-primary-foreground text-center">Z</div>
+                <div className="text-[10px] text-muted-foreground text-center uppercase tracking-tighter mt-1">headlines</div>
+              </div>
+            </Link>
           </div>
+
+
+
         </div>
-      
-       
-        </div>
-      
+
       </div>
     </header>
   );
