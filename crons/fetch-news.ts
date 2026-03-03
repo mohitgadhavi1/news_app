@@ -17,10 +17,20 @@ export async function fetchAndStoreNews(sourceId: string) {
         const db = client.db('news');
         const collection = db.collection('external_news');
 
-        // Performance index only
+        // Performance indexes
         await collection.createIndex(
             { articleId: 1 },
             { unique: true, background: true }
+        );
+        // Optimize main feed sorting
+        await collection.createIndex(
+            { publishOn: -1 },
+            { background: true }
+        );
+        // Optimize category-specific queries and aggregation
+        await collection.createIndex(
+            { "category.categoryName": 1, publishOn: -1 },
+            { background: true }
         );
 
         console.log(`⏳ Fetching news from source: ${sourceId}...`);

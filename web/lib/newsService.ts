@@ -45,7 +45,7 @@ export async function fetchCryptoNews(limit = 12, skip = 0, categoryName?: strin
             .skip(skip)
             .limit(limit)
             .toArray(),
-        col.countDocuments(query)
+        categoryName ? col.countDocuments(query) : col.estimatedDocumentCount()
     ]);
 
     return {
