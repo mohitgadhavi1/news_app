@@ -14,7 +14,9 @@ interface NewsFetchResult {
 }
 
 export async function newsFetchServe(page: number, categoryName?: string): Promise<NewsFetchResult> {
-    const skip = (page - 1) * ITEMS_PER_PAGE;
+    // ✅ Security: Ensure page is a positive integer to avoid negative skip or DoS
+    const validatedPage = Math.max(1, Math.floor(page || 1));
+    const skip = (validatedPage - 1) * ITEMS_PER_PAGE;
 
 
     // ✅ Let errors throw naturally for Next.js error boundaries to catch
