@@ -1,4 +1,5 @@
 export interface NewsItem {
+    publishOn: any;
     id: string;
     articleId?: string;
     source: string;
@@ -19,4 +20,5 @@ export interface NewsItem {
     commentCount?: number;
     tickers?: string[];
     createdAt?: Date | string;
+    categoryName?: string | null;
 }

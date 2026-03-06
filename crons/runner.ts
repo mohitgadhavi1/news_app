@@ -32,20 +32,21 @@ async function runJob(sourceId: string, sourceName: string) {
     }
 }
 
-// 1. Seeking Alpha (ID: "3") - Limit 500/mo. Run every 2 hours on the hour.
-cron.schedule('0 */2 * * *', () => runJob("3", "Seeking Alpha"));
-
-// 2. NewsAPI (ID: "2") - Limit 100/day. Run every 2 hours at 30 minutes past.
-cron.schedule('30 */2 * * *', () => runJob("2", "NewsAPI"));
-
-// 3. GNews (ID: "1") - Limit 100/day. Run every 2 hours at 15 minutes past.
-cron.schedule('15 */2 * * *', () => runJob("1", "GNews"));
-
-// 4. News Category Generation - RPM=5, RPD=20. Run every 15 minutes.
-cron.schedule('*/15 * * * *', async () => {
-    logger.info('🕒 Running scheduled category generation...');
-    await processUncategorizedNews();
-});
+// Migrated to GitHub Actions. See .github/workflows/
+// // 1. Seeking Alpha (ID: "3") - Limit 500/mo. Run every 2 hours on the hour.
+// cron.schedule('0 */2 * * * ', () => runJob("3", "Seeking Alpha"));
+// 
+// // 2. NewsAPI (ID: "2") - Limit 100/day. Run every 2 hours at 30 minutes past.
+// cron.schedule('30 */2 * * *', () => runJob("2", "NewsAPI"));
+// 
+// // 3. GNews (ID: "1") - Limit 100/day. Run every 2 hours at 15 minutes past.
+// cron.schedule('15 */2 * * *', () => runJob("1", "GNews"));
+// 
+// // 4. News Category Generation - RPM=5, RPD=20. Run every 15 minutes.
+// cron.schedule('*/15 * * * *', async () => {
+//     logger.info('🕒 Running scheduled category generation...');
+//     await processUncategorizedNews();
+// });
 
 logger.info('⚡ Running initial fetch for all sources... ');
 const initialRun = async () => {

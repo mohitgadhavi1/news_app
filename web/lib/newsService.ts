@@ -30,6 +30,7 @@ export interface CryptoNewsResult {
     source: string;
     publishedAt: string | null;
     imageUrl: string | null;
+    categoryName: string | null;
 }
 
 export async function fetchCryptoNews(limit = 12, skip = 0, categoryName?: string) {
@@ -87,6 +88,7 @@ function mapDocumentToResult(doc: CryptoNewsDocument): CryptoNewsResult {
         source: doc.source ?? "seeking-alpha",
         publishedAt: formatDate(doc.publishOn),
         imageUrl: extractFirstImage(doc.images),
+        categoryName: (doc as any).category?.categoryName ?? null,
     };
 }
 

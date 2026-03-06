@@ -1,0 +1,55 @@
+name: News Fetching
+
+on:
+  schedule:
+    # Run every 2 hours (staggered shifts)
+    - cron: '0 */2 * * *'  # Seeking Alpha (ID: 3)
+    - cron: '15 */2 * * *' # GNews (ID: 1)
+    - cron: '30 */2 * * *' # NewsAPI (ID: 2)
+  workflow_dispatch:
+    inputs:
+      source_id:
+        description: 'Specific source ID to fetch (optional)'
+        required: false
+        default: ''
+
+jobs:
+  fetch-news:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: crons/package-lock.json
+
+      - name: Install dependencies
+        working-directory: crons
+        run: npm ci
+
+      - name: Determine Source and Run Job
+        working-directory: crons
+        env:
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
+          RAPIDAPI_KEY: ${{ secrets.RAPIDAPI_KEY }}
+          NEWSAPI_ORD_KEY: ${{ secrets.NEWSAPI_ORD_KEY }}
+          GNEWS_API_KEY: ${{ secrets.GNEWS_API_KEY }}
+        run: |
+          if [ -n "${{ github.event.inputs.source_id }}" ]; then
+            npx tsx run-job.ts --source-id ${{ github.event.inputs.source_id }}
+          elif [ "${{ github.event.schedule }}" == "0 */2 * * *" ]; then
+            npx tsx run-job.ts --source-id 3
+          elif [ "${{ github.event.schedule }}" == "15 */2 * * *" ]; then
+            npx tsx run-job.ts --source-id 1
+          elif [ "${{ github.event.schedule }}" == "30 */2 * * *" ]; then
+            npx tsx run-job.ts --source-id 2
+          else
+            # Default run for workflow_dispatch without input or other triggers: run all
+            npx tsx run-job.ts --source-id 1
+            npx tsx run-job.ts --source-id 2
+            npx tsx run-job.ts --source-id 3
+          fi
