@@ -2,7 +2,7 @@ name: News Category Generation
 
 on:
   schedule:
-    - cron: '*/30 * * * *' # Run every 30 minutes
+    - cron: "*/30 * * * *" # Run every 30 minutes
   workflow_dispatch:
 
 jobs:
@@ -15,8 +15,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: "npm"
           cache-dependency-path: crons/package-lock.json
 
       - name: Install dependencies
@@ -28,4 +28,4 @@ jobs:
         env:
           MONGODB_URI: ${{ secrets.MONGODB_URI }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-        run: npx tsx run-job.ts --category-gen
+        run: npx tsx run-category-gen.ts
