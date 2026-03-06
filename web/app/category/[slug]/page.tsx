@@ -1,7 +1,4 @@
 import { categories } from "@/lib/categories";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/app/components/ui/sidebar/app-sidebar";
-import Header from "@/app/components/Header";
 import NewsSection from "@/app/components/NewsSection";
 import { notFound } from "next/navigation";
 
@@ -22,18 +19,10 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
     }
 
     return (
-        <div className="[--header-height:calc(--spacing(14))]">
-            <SidebarProvider defaultOpen={false} className="flex flex-col">
-                <Header />
-                <AppSidebar />
-                <SidebarInset>
-                    <NewsSection
-                        searchParams={query}
-                        categoryName={category.name}
-                        categorySlug={category.slug}
-                    />
-                </SidebarInset>
-            </SidebarProvider>
-        </div>
+        <NewsSection
+            searchParams={query}
+            categoryName={category.name}
+            categorySlug={category.slug}
+        />
     );
 }
