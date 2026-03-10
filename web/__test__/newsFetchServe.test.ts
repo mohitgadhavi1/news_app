@@ -172,10 +172,11 @@ describe('News Service Layer', () => {
     });
 
     describe('Edge Cases', () => {
-        it('should handle very large page numbers', async () => {
+        it('should cap very large page numbers to 500 for security', async () => {
             await newsFetchServe(1000);
 
-            expect(mockFetchCryptoNews).toHaveBeenCalledWith(12, 11988, undefined);
+            // Cap is 500: (500-1) * 12 = 5988
+            expect(mockFetchCryptoNews).toHaveBeenCalledWith(12, 5988, undefined);
         });
 
         it('should handle page number as float by floor validation', async () => {
