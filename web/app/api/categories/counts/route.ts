@@ -1,6 +1,12 @@
 import { NextResponse } from "next/server";
 import { fetchCategoryCounts } from "@/lib/newsService";
 
+/**
+ * Cache category counts for 10 minutes (600 seconds).
+ * This reduces the frequency of expensive MongoDB aggregations for side navigation.
+ */
+export const revalidate = 600;
+
 export async function GET() {
     try {
         const counts = await fetchCategoryCounts();
