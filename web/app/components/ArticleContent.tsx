@@ -1,11 +1,6 @@
 "use client";
 
-import dynamic from "next/dynamic";
-
-const SafeHTML = dynamic(
-    () => import("@/lib/SafeHtml"),
-    { ssr: false }
-);
+import SafeHTML from "@/lib/SafeHtml";
 
 export default function ArticleContent({ content }: { content: string }) {
     return (

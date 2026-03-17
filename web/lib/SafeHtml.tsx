@@ -1,11 +1,7 @@
 // SafeHTML.tsx
-
-
-import DOMPurify from 'dompurify';
+import DOMPurify from 'isomorphic-dompurify';
 
 function SafeHTML({ html }: { html: string }) {
-
-
   return (
     <div
       dangerouslySetInnerHTML={{

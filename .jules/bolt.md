@@ -3,3 +3,7 @@
 ## 2025-05-15 - [Database Index and Count Optimization]
 **Learning:** For high-traffic news feeds, compound indexes on `(FilterField + SortField)` (following the ESR rule: Equality, Sort, Range) are critical to avoid O(N log N) in-memory sorts. Additionally, `countDocuments({})` on large collections can be a hidden bottleneck; `estimatedDocumentCount()` provides an O(1) alternative for total counts.
 **Action:** Always verify query patterns in the service layer against index definitions in the persistence layer. Prefer `estimatedDocumentCount()` when a full collection count is needed for pagination.
+
+## 2026-03-17 - [SSR for Sanitized HTML]
+**Learning:** Client-side only HTML sanitization (using `ssr: false` for `dompurify`) blocks SSR for article content, hurting FCP and SEO. Using `isomorphic-dompurify` allows for server-side sanitization and full SSR of news content.
+**Action:** Prefer `isomorphic-dompurify` over `dompurify` in Next.js projects to enable SSR for user-generated or external HTML content. Components rendering sanitized HTML should use standard imports to ensure the content is part of the initial HTML payload.

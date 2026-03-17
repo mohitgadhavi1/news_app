@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from 'react';
-import dynamic from 'next/dynamic';
+import SafeHTML from '@/lib/SafeHtml';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,11 +8,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ExternalLink, MessageSquare } from 'lucide-react';
 import { NewsItem } from '@/types/news';
-
-const SafeHTML = dynamic(
-  () => import('@/lib/SafeHtml'),
-  { ssr: false }
-);
 
 export default function NewsCard({ item, index, categorySlug = "all" }: { item: NewsItem, index: number, categorySlug?: string }) {
   const [isFlipped, setIsFlipped] = useState(false);
