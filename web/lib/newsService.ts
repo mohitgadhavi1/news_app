@@ -71,6 +71,10 @@ export async function fetchCategoryCounts() {
 }
 
 export async function fetchArticleById(id: string) {
+    // ✅ Security: Validate ObjectId format to prevent BSON errors or potential injection attempts
+    if (!ObjectId.isValid(id)) {
+        return null;
+    }
     const db = await getDb();
     const col = db.collection<CryptoNewsDocument>("external_news");
 
