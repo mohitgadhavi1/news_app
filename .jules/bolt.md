@@ -7,3 +7,7 @@
 ## 2026-03-17 - [SSR for Sanitized HTML]
 **Learning:** Client-side only HTML sanitization (using `ssr: false` for `dompurify`) blocks SSR for article content, hurting FCP and SEO. Using `isomorphic-dompurify` allows for server-side sanitization and full SSR of news content.
 **Action:** Prefer `isomorphic-dompurify` over `dompurify` in Next.js projects to enable SSR for user-generated or external HTML content. Components rendering sanitized HTML should use standard imports to ensure the content is part of the initial HTML payload.
+
+## 2026-03-20 - [MongoDB Projection and API Caching]
+**Learning:** Fetching entire documents when only a few fields are needed is a common but expensive anti-pattern. MongoDB projection (`.project()`) significantly reduces network overhead and application memory usage. Additionally, static or time-based caching (`revalidate`) on heavy aggregation endpoints (like category counts) prevents redundant database load.
+**Action:** Always use `.project()` to specify required fields in MongoDB queries. Implement `export const revalidate = X;` in Next.js API routes for data that doesn't change on every request.

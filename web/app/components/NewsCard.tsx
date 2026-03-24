@@ -7,9 +7,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ExternalLink, MessageSquare } from 'lucide-react';
-import { NewsItem } from '@/types/news';
+import { CryptoNewsResult } from '@/lib/newsService';
 
-export default function NewsCard({ item, index, categorySlug = "all" }: { item: NewsItem, index: number, categorySlug?: string }) {
+export default function NewsCard({ item, index, categorySlug = "all" }: { item: CryptoNewsResult, index: number, categorySlug?: string }) {
   const [isFlipped, setIsFlipped] = useState(false);
   const [imgError, setImgError] = useState(false);
 

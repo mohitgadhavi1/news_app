@@ -8,6 +8,7 @@ interface CryptoNewsDocument {
     articleId?: string;
     type?: string;
     title?: string;
+    content?: string;
     contentHtml?: string;
     publishOn?: Date | string;
     lastModified?: Date | string;
@@ -19,6 +20,9 @@ interface CryptoNewsDocument {
     canonicalUrl?: string | null;
     tickers?: string[];
     createdAt?: Date | string;
+    category?: {
+        categoryName?: string;
+    };
 }
 
 export interface CryptoNewsResult {
@@ -31,6 +35,11 @@ export interface CryptoNewsResult {
     publishedAt: string | null;
     imageUrl: string | null;
     categoryName: string | null;
+    isExclusive: boolean;
+    tickers: string[];
+    commentCount: number;
+    images?: Record<string, string>;
+    canonicalUrl?: string | null;
 }
 
 export async function fetchCryptoNews(limit = 12, skip = 0, categoryName?: string) {
@@ -42,6 +51,20 @@ export async function fetchCryptoNews(limit = 12, skip = 0, categoryName?: strin
     const [docs, total] = await Promise.all([
         col
             .find(query)
+            .project({
+                _id: 1,
+                title: 1,
+                content: 1,
+                contentHtml: 1,
+                canonicalUrl: 1,
+                source: 1,
+                publishOn: 1,
+                images: 1,
+                "category.categoryName": 1,
+                isExclusive: 1,
+                tickers: 1,
+                commentCount: 1
+            })
             .sort({ publishOn: -1 })
             .skip(skip)
             .limit(limit)
@@ -83,16 +106,22 @@ export async function fetchArticleById(id: string) {
 }
 
 function mapDocumentToResult(doc: CryptoNewsDocument): CryptoNewsResult {
+    const content = doc.content ?? doc.contentHtml ?? "";
     return {
         id: doc._id?.toString() ?? "",
         title: doc.title ?? "",
-        summary: (doc as any).content ?? doc.contentHtml ?? "", // Safely grab content since it's mapped in backend
-        content: (doc as any).content ?? doc.contentHtml ?? "",
+        summary: content,
+        content: content,
         url: doc.canonicalUrl ?? "",
         source: doc.source ?? "seeking-alpha",
         publishedAt: formatDate(doc.publishOn),
         imageUrl: extractFirstImage(doc.images),
-        categoryName: (doc as any).category?.categoryName ?? null,
+        categoryName: doc.category?.categoryName ?? null,
+        isExclusive: doc.isExclusive ?? false,
+        tickers: doc.tickers ?? [],
+        commentCount: doc.commentCount ?? 0,
+        images: doc.images,
+        canonicalUrl: doc.canonicalUrl,
     };
 }
 
