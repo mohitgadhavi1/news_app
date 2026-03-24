@@ -1,4 +1,3 @@
-import { NewsItem } from "@/types/news";
 import NewsCard from "./NewsCard";
 import NewsPagination from "./NewsPagination";
 import { newsFetchServe } from "@/hooks/newsFetchServe";
@@ -64,7 +63,7 @@ export default async function NewsSection({ searchParams = {}, categoryName, cat
               No news available — ensure MongoDB is configured.
             </div>
           ) : (
-            news.map((n: any, index: number) => (
+            news.map((n, index: number) => (
               <NewsCard
                 key={n.id}
                 item={n}

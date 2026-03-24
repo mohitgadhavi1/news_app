@@ -1,5 +1,5 @@
 export interface NewsItem {
-    publishOn: any;
+    publishOn: Date | string | null;
     id: string;
     articleId?: string;
     source: string;
