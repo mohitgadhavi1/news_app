@@ -14,8 +14,9 @@ interface NewsFetchResult {
 }
 
 export async function newsFetchServe(page: number, categoryName?: string): Promise<NewsFetchResult> {
-    // ✅ Security: Ensure page is a positive integer to avoid negative skip or DoS
-    const validatedPage = Math.max(1, Math.floor(page || 1));
+    // ✅ Security: Ensure page is a positive integer and capped to avoid negative skip or DoS via large offsets
+    const MAX_PAGES = 500;
+    const validatedPage = Math.min(MAX_PAGES, Math.max(1, Math.floor(page || 1)));
     const skip = (validatedPage - 1) * ITEMS_PER_PAGE;
 
 

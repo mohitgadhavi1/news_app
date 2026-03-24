@@ -11,18 +11,11 @@ export async function GET(request: Request) {
 
         const news = await fetchCryptoNews(validatedLimit);
         return NextResponse.json({ ok: true, data: news });
-    } catch (err) {  // implicitly 'unknown' in modern TS
-        let errorMessage = "An unexpected error occurred";
-
-        if (err instanceof Error) {
-            errorMessage = err.message;
-        } else if (typeof err === "string") {
-            errorMessage = err;
-        }
-
+    } catch (err) {
+        console.error("News API Error:", err);
         return NextResponse.json({
             ok: false,
-            error: errorMessage
+            error: "Internal Server Error"
         }, { status: 500 });
     }
 }
