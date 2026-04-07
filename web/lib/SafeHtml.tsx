@@ -1,7 +1,12 @@
 // SafeHTML.tsx
+import React from 'react';
 import DOMPurify from 'isomorphic-dompurify';
 
-function SafeHTML({ html }: { html: string }) {
+/**
+ * ⚡ Bolt Optimization: Wrap SafeHTML in React.memo to prevent redundant
+ * HTML sanitization when parent components re-render without changing the content.
+ */
+const SafeHTML = React.memo(({ html }: { html: string }) => {
   return (
     <div
       dangerouslySetInnerHTML={{
@@ -9,6 +14,8 @@ function SafeHTML({ html }: { html: string }) {
       }}
     />
   );
-}
+});
+
+SafeHTML.displayName = 'SafeHTML';
 
 export default SafeHTML;

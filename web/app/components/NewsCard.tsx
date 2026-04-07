@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import SafeHTML from '@/lib/SafeHtml';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -18,14 +18,17 @@ export default function NewsCard({ item, index, categorySlug = "all" }: { item: 
   const previewText = item.summary || item.content || "";
   const fullText = item.content || item.summary || "No full content available.";
 
-  const initials = item.title
-    .replace(/[0-9]/g, '')
-    .trim()
-    .split(/\s+/)
-    .filter(word => word.length > 0)
-    .slice(0, 2)
-    .map(word => word[0].toUpperCase())
-    .join('');
+  // ⚡ Bolt Optimization: Memoize initials to avoid re-calculating on every flip
+  const initials = useMemo(() => {
+    return item.title
+      .replace(/[0-9]/g, '')
+      .trim()
+      .split(/\s+/)
+      .filter(word => word.length > 0)
+      .slice(0, 2)
+      .map(word => word[0].toUpperCase())
+      .join('');
+  }, [item.title]);
 
   return (
     <div
@@ -44,6 +47,7 @@ export default function NewsCard({ item, index, categorySlug = "all" }: { item: 
                 src={primaryImage}
                 alt={item.title}
                 className="object-cover"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 onError={() => setImgError(true)}
               />
             ) : (
