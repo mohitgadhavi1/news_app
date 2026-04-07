@@ -20,7 +20,7 @@ export default function NotFound() {
             </h2>
 
             <p className="mb-8 max-w-md text-muted-foreground">
-                Oops! The news you're looking for seems to have vanished or been moved to a different headline.
+                Oops! The news you&apos;re looking for seems to have vanished or been moved to a different headline.
             </p>
 
             <div className="flex flex-col gap-4 sm:flex-row">

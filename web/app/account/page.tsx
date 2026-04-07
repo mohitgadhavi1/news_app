@@ -1,6 +1,6 @@
 "use client"
 import { useEffect, useState } from "react"
-import { fetchUserInfo, getStoredAuth, logout, getBasicUserFromUrlOrToken } from "@/lib/auth"
+import { fetchUserInfo, getStoredAuth, logout, getBasicUserFromUrlOrToken, ZidbitUser } from "@/lib/auth"
 // AppSidebar and SidebarProvider are now global in layout
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -17,9 +17,8 @@ function formatDate(iso: string | number | undefined) {
 }
 
 export default function AccountPage() {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<ZidbitUser | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   // Try to extract basic user info from URL or token if /me fails
 
   useEffect(() => {
@@ -75,7 +74,7 @@ export default function AccountPage() {
           ) : user ? (
             <div className="flex flex-col items-center gap-4">
               <Avatar className="w-24 h-24">
-                {user.picture ? (
+                {user.picture && (user.picture.startsWith('http://') || user.picture.startsWith('https://') || user.picture.startsWith('data:')) ? (
                   <AvatarImage src={user.picture} alt={user.name || user.email} />
                 ) : null}
                 <AvatarFallback>{(user.name || user.email || "U").slice(0, 2).toUpperCase()}</AvatarFallback>
@@ -95,7 +94,6 @@ export default function AccountPage() {
                   <span>{formatDate(user.exp || expiresAt)}</span>
                 </div>
               </div>
-              {error && <div className="text-red-500 text-sm mt-2">{error} (CORS error possible on localhost)</div>}
             </div>
           ) : (
             <div className="flex flex-col items-center">

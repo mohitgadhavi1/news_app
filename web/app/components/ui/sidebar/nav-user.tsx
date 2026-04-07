@@ -33,7 +33,7 @@ import { Sun, Moon, Laptop } from "lucide-react";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import applyTheme, { Theme } from "@/lib/applyTheme";
 import { useEffect, useState } from "react"
-import { getStoredAuth, fetchUserInfo, redirectToLogin, logout, getBasicUserFromUrlOrToken } from "@/lib/auth"
+import { getStoredAuth, fetchUserInfo, redirectToLogin, logout, getBasicUserFromUrlOrToken, ZidbitUser } from "@/lib/auth"
 
 const STORAGE_KEY = "theme-preference";
 
@@ -43,7 +43,7 @@ export function NavUser() {
   // Theme logic
   const [theme, setTheme] = useState<Theme>(() => {
     try {
-      const v = localStorage.getItem(STORAGE_KEY);
+      const v = typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : null;
       return (v as Theme) || "system";
     } catch {
       return "system";
@@ -65,7 +65,7 @@ export function NavUser() {
     setTheme(t);
   };
   // Auth logic
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<ZidbitUser | null>(null);
   const [loading, setLoading] = useState(true);
   // Try to extract basic user info from URL or token if /me fails
 
@@ -151,7 +151,9 @@ export function NavUser() {
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarImage src={user.picture} alt={user.name || user.email} />
+                {user.picture && (user.picture.startsWith('http://') || user.picture.startsWith('https://') || user.picture.startsWith('data:')) ? (
+                  <AvatarImage src={user.picture} alt={user.name || user.email} />
+                ) : null}
                 <AvatarFallback className="rounded-lg">{(user.name || user.email || "U").slice(0, 2).toUpperCase()}</AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
@@ -170,7 +172,9 @@ export function NavUser() {
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src={user.picture} alt={user.name || user.email} />
+                  {user.picture && (user.picture.startsWith('http://') || user.picture.startsWith('https://') || user.picture.startsWith('data:')) ? (
+                    <AvatarImage src={user.picture} alt={user.name || user.email} />
+                  ) : null}
                   <AvatarFallback className="rounded-lg">{(user.name || user.email || "U").slice(0, 2).toUpperCase()}</AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
