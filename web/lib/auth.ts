@@ -17,10 +17,19 @@ export function handleAuthCallback() {
     const token = urlParams.get('token');
     const expiresAt = urlParams.get('expiresAt');
     const uid = urlParams.get('uid');
-    if (token) {
+
+    // ✅ Security: Basic validation of parameters
+    if (token && typeof token === 'string' && token.length > 20) {
         localStorage.setItem(TOKEN_KEY, token);
-        if (expiresAt) localStorage.setItem(EXPIRY_KEY, expiresAt);
-        if (uid) localStorage.setItem(UID_KEY, uid);
+
+        if (expiresAt && !isNaN(Number(expiresAt))) {
+            localStorage.setItem(EXPIRY_KEY, expiresAt);
+        }
+
+        if (uid && typeof uid === 'string' && uid.length > 0) {
+            localStorage.setItem(UID_KEY, uid);
+        }
+
         // Clean URL
         window.history.replaceState({}, document.title, window.location.pathname);
         return { token, expiresAt, uid };
@@ -82,6 +91,17 @@ export function getBasicUserFromUrlOrToken(providedToken?: string) {
         }
     }
     return null;
+}
+
+export interface ZidbitUser {
+    email?: string | null;
+    name?: string | null;
+    picture?: string | null;
+    uid?: string | null;
+    lastLoginAt?: string | number;
+    iat?: number;
+    exp?: number;
+    error?: string;
 }
 
 export async function fetchUserInfo(token?: string) {
