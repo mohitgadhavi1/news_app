@@ -1,6 +1,6 @@
 import { ObjectId } from "mongodb";
 import { getDb } from "./mongodb";
-import { isValidUrl, isValidImageUrl } from "./utils";
+import { isValidUrl, isValidImageUrl, formatSimpleDate } from "./utils";
 
 // ✅ Fixed document interface
 interface CryptoNewsDocument {
@@ -118,7 +118,7 @@ export function mapDocumentToResult(doc: CryptoNewsDocument): CryptoNewsResult {
         content: content,
         url: validatedUrl,
         source: doc.source ?? "seeking-alpha",
-        publishedAt: formatDate(doc.publishOn),
+        publishedAt: formatSimpleDate(doc.publishOn),
         imageUrl: extractFirstImage(doc.images),
         categoryName: doc.category?.categoryName ?? null,
         isExclusive: doc.isExclusive ?? false,
@@ -133,12 +133,4 @@ export function extractFirstImage(images: Record<string, string> | undefined): s
     if (!images || typeof images !== 'object') return null;
     const firstImage = Object.values(images)[0];
     return isValidImageUrl(firstImage) ? firstImage : null;
-}
-
-function formatDate(item: string | Date | undefined): string | null {
-    if (!item) return null;
-    const d = new Date(item);
-    return d.getFullYear() + '-' +
-        String(d.getMonth() + 1).padStart(2, '0') + '-' +
-        String(d.getDate()).padStart(2, '0');
 }

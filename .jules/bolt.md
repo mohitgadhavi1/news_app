@@ -11,3 +11,7 @@
 ## 2026-03-20 - [MongoDB Projection and API Caching]
 **Learning:** Fetching entire documents when only a few fields are needed is a common but expensive anti-pattern. MongoDB projection (`.project()`) significantly reduces network overhead and application memory usage. Additionally, static or time-based caching (`revalidate`) on heavy aggregation endpoints (like category counts) prevents redundant database load.
 **Action:** Always use `.project()` to specify required fields in MongoDB queries. Implement `export const revalidate = X;` in Next.js API routes for data that doesn't change on every request.
+
+## 2025-05-20 - [Efficient Date Formatting]
+**Learning:** The `Intl` API (`toLocaleDateString`, `toLocaleString`) is surprisingly heavy when used inside the render loop of large lists (like news feeds). It creates significant overhead and can cause hydration mismatches if not handled carefully.
+**Action:** Use manual string building for simple date formats in performance-critical components. Pre-formatting dates in the service layer or using lightweight utilities in `utils.ts` can drastically reduce rendering time per item.
