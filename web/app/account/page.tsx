@@ -1,6 +1,7 @@
 "use client"
 import { useEffect, useState } from "react"
 import { fetchUserInfo, getStoredAuth, logout, getBasicUserFromUrlOrToken, ZidbitUser } from "@/lib/auth"
+import { isValidImageUrl } from "@/lib/utils"
 // AppSidebar and SidebarProvider are now global in layout
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -74,8 +75,8 @@ export default function AccountPage() {
           ) : user ? (
             <div className="flex flex-col items-center gap-4">
               <Avatar className="w-24 h-24">
-                {user.picture && (user.picture.startsWith('http://') || user.picture.startsWith('https://') || user.picture.startsWith('data:')) ? (
-                  <AvatarImage src={user.picture} alt={user.name || user.email} />
+                {isValidImageUrl(user.picture) ? (
+                  <AvatarImage src={user.picture!} alt={user.name || user.email} />
                 ) : null}
                 <AvatarFallback>{(user.name || user.email || "U").slice(0, 2).toUpperCase()}</AvatarFallback>
               </Avatar>
