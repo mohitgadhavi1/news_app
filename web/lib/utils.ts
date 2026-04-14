@@ -32,3 +32,35 @@ export function isValidImageUrl(url: string | null | undefined): boolean {
     return url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:');
   }
 }
+
+/**
+ * ⚡ Bolt Optimization: Efficient date formatting (YYYY-MM-DD) that avoids the heavy Intl API.
+ */
+export function formatSimpleDate(item: string | Date | undefined): string | null {
+  if (!item) return null;
+  const d = new Date(item);
+  if (isNaN(d.getTime())) return null;
+
+  return d.getFullYear() + '-' +
+    String(d.getMonth() + 1).padStart(2, '0') + '-' +
+    String(d.getDate()).padStart(2, '0');
+}
+
+/**
+ * ⚡ Bolt Optimization: Efficient date-time formatting (YYYY-MM-DD HH:MM:SS) that avoids the heavy Intl API.
+ */
+export function formatFullDateTime(item: string | Date | undefined): string | null {
+  if (!item) return null;
+  const d = new Date(item);
+  if (isNaN(d.getTime())) return null;
+
+  const date = d.getFullYear() + '-' +
+    String(d.getMonth() + 1).padStart(2, '0') + '-' +
+    String(d.getDate()).padStart(2, '0');
+
+  const time = String(d.getHours()).padStart(2, '0') + ':' +
+    String(d.getMinutes()).padStart(2, '0') + ':' +
+    String(d.getSeconds()).padStart(2, '0');
+
+  return `${date} ${time}`;
+}

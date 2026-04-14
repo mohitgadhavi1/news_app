@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ExternalLink, MessageSquare } from 'lucide-react';
 import { CryptoNewsResult } from '@/lib/newsService';
+import { formatFullDateTime } from '@/lib/utils';
 
 export default function NewsCard({ item, index, categorySlug = "all" }: { item: CryptoNewsResult, index: number, categorySlug?: string }) {
   const [isFlipped, setIsFlipped] = useState(false);
@@ -105,7 +106,7 @@ export default function NewsCard({ item, index, categorySlug = "all" }: { item: 
                   <Badge variant="secondary" className="font-normal capitalize truncate max-w-[100px]">
                     {item.source}
                   </Badge>
-                  {item.publishedAt && <span className="truncate">{new Date(item.publishedAt).toLocaleDateString()}</span>}
+                  {item.publishedAt && <span className="truncate">{item.publishedAt}</span>}
                 </div>
                 {item.commentCount !== undefined && item.commentCount > 0 && (
                   <span className="flex items-center gap-1">
@@ -123,7 +124,7 @@ export default function NewsCard({ item, index, categorySlug = "all" }: { item: 
           <CardHeader className="p-0 mb-4 shrink-0">
             <CardTitle className="text-lg line-clamp-3">{item.title}</CardTitle>
             <div className="flex items-center gap-3 text-xs text-muted-foreground mt-2 border-b pb-2">
-              {item.publishedAt && <span>Published {new Date(item.publishedAt).toLocaleString()}</span>}
+              {item.publishedAt && <span>Published {formatFullDateTime(item.publishedAt)}</span>}
             </div>
           </CardHeader>
 
