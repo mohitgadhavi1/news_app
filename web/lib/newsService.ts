@@ -1,5 +1,6 @@
 import { ObjectId } from "mongodb";
 import { getDb } from "./mongodb";
+import { isValidUrl, isValidImageUrl } from "./utils";
 
 // ✅ Fixed document interface
 interface CryptoNewsDocument {
@@ -105,14 +106,17 @@ export async function fetchArticleById(id: string) {
     return doc ? mapDocumentToResult(doc) : null;
 }
 
-function mapDocumentToResult(doc: CryptoNewsDocument): CryptoNewsResult {
+export function mapDocumentToResult(doc: CryptoNewsDocument): CryptoNewsResult {
     const content = doc.content ?? doc.contentHtml ?? "";
+    const canonicalUrl = doc.canonicalUrl ?? "";
+    const validatedUrl = isValidUrl(canonicalUrl) ? canonicalUrl : "";
+
     return {
         id: doc._id?.toString() ?? "",
         title: doc.title ?? "",
         summary: content,
         content: content,
-        url: doc.canonicalUrl ?? "",
+        url: validatedUrl,
         source: doc.source ?? "seeking-alpha",
         publishedAt: formatDate(doc.publishOn),
         imageUrl: extractFirstImage(doc.images),
@@ -121,13 +125,14 @@ function mapDocumentToResult(doc: CryptoNewsDocument): CryptoNewsResult {
         tickers: doc.tickers ?? [],
         commentCount: doc.commentCount ?? 0,
         images: doc.images,
-        canonicalUrl: doc.canonicalUrl,
+        canonicalUrl: validatedUrl,
     };
 }
 
-function extractFirstImage(images: Record<string, string> | undefined): string | null {
+export function extractFirstImage(images: Record<string, string> | undefined): string | null {
     if (!images || typeof images !== 'object') return null;
-    return Object.values(images)[0] ?? null;
+    const firstImage = Object.values(images)[0];
+    return isValidImageUrl(firstImage) ? firstImage : null;
 }
 
 function formatDate(item: string | Date | undefined): string | null {
