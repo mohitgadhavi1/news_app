@@ -32,10 +32,22 @@ export default function NewsCard({ item, index, categorySlug = "all" }: { item: 
     .map(word => word[0].toUpperCase())
     .join('');
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      setIsFlipped(!isFlipped);
+    }
+  };
+
   return (
     <div
-      className="group w-full h-[450px] [perspective:1000px] cursor-pointer"
+      className="group w-full h-[450px] [perspective:1000px] cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-xl"
       onClick={() => setIsFlipped(!isFlipped)}
+      onKeyDown={handleKeyDown}
+      role="button"
+      tabIndex={0}
+      aria-pressed={isFlipped}
+      aria-label={`News article: ${item.title}. ${isFlipped ? 'Click or press Enter to flip back.' : 'Click or press Enter to flip for summary.'}`}
     >
       <div className={`relative w-full h-full transition-transform duration-700 [transform-style:preserve-3d] ${isFlipped ? '[transform:rotateY(180deg)]' : ''}`}>
 
@@ -144,6 +156,7 @@ export default function NewsCard({ item, index, categorySlug = "all" }: { item: 
                 size="sm"
                 asChild
                 onClick={(e) => e.stopPropagation()}
+                tabIndex={isFlipped ? 0 : -1}
               >
                 <Link href={`/category/${categorySlug}/article/${item.id}`}>
                   View Details
@@ -154,6 +167,7 @@ export default function NewsCard({ item, index, categorySlug = "all" }: { item: 
                 size="sm"
                 asChild
                 onClick={(e) => e.stopPropagation()}
+                tabIndex={isFlipped ? 0 : -1}
               >
                 <a
                   href={officialUrl}
