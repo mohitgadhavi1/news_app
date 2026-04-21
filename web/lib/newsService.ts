@@ -1,6 +1,7 @@
 import { ObjectId } from "mongodb";
 import { getDb } from "./mongodb";
-import { isValidUrl, isValidImageUrl, formatSimpleDate } from "./utils";
+import { isValidUrl, isValidImageUrl, formatSimpleDate, formatFullDateTime } from "./utils";
+import DOMPurify from "isomorphic-dompurify";
 
 // ✅ Fixed document interface
 interface CryptoNewsDocument {
@@ -34,6 +35,8 @@ export interface CryptoNewsResult {
     url: string;
     source: string;
     publishedAt: string | null;
+    publishedAtFull: string | null;
+    initials: string;
     imageUrl: string | null;
     categoryName: string | null;
     isExclusive: boolean;
@@ -113,18 +116,39 @@ export async function fetchArticleById(id: string) {
 }
 
 export function mapDocumentToResult(doc: CryptoNewsDocument): CryptoNewsResult {
-    const content = doc.content ?? doc.contentHtml ?? "";
+    const rawContent = doc.content ?? doc.contentHtml ?? "";
     const canonicalUrl = doc.canonicalUrl ?? "";
     const validatedUrl = isValidUrl(canonicalUrl) ? canonicalUrl : "";
+
+    // ⚡ Bolt Optimization: Pre-calculate initials on the server
+    const initials = (doc.title ?? "")
+        .replace(/[0-9]/g, '')
+        .trim()
+        .split(/\s+/)
+        .filter(word => word.length > 0)
+        .slice(0, 2)
+        .map(word => word[0].toUpperCase())
+        .join('');
+
+    // ⚡ Bolt Optimization: Sanitize HTML on the server and create a plain-text summary
+    // to reduce RSC payload size and client-side processing.
+    const sanitizedContent = DOMPurify.sanitize(rawContent);
+    const summary = sanitizedContent
+        .replace(/<[^>]*>/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .substring(0, 280);
 
     return {
         id: doc._id?.toString() ?? "",
         title: doc.title ?? "",
-        summary: content,
-        content: content,
+        summary: summary,
+        content: sanitizedContent,
         url: validatedUrl,
         source: doc.source ?? "seeking-alpha",
         publishedAt: formatSimpleDate(doc.publishOn),
+        publishedAtFull: formatFullDateTime(doc.publishOn),
+        initials,
         imageUrl: extractFirstImage(doc.images),
         categoryName: doc.category?.categoryName ?? null,
         isExclusive: doc.isExclusive ?? false,

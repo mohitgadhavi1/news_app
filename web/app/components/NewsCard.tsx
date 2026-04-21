@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import SafeHTML from '@/lib/SafeHtml';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -8,7 +8,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ExternalLink, MessageSquare } from 'lucide-react';
 import { CryptoNewsResult } from '@/lib/newsService';
-import { formatFullDateTime } from '@/lib/utils';
 
 export default function NewsCard({ item, index, categorySlug = "all" }: { item: CryptoNewsResult, index: number, categorySlug?: string }) {
   const [isFlipped, setIsFlipped] = useState(false);
@@ -16,20 +15,8 @@ export default function NewsCard({ item, index, categorySlug = "all" }: { item: 
 
   const primaryImage = item.images?.primary || item.imageUrl;
   const officialUrl = item.canonicalUrl || item.url || "#";
-  const previewText = item.summary || item.content || "";
-  const fullText = item.content || item.summary || "No full content available.";
-
-  // ⚡ Bolt Optimization: Memoize initials to avoid re-calculating on every flip
-  const initials = useMemo(() => {
-    return item.title
-      .replace(/[0-9]/g, '')
-      .trim()
-      .split(/\s+/)
-      .filter(word => word.length > 0)
-      .slice(0, 2)
-      .map(word => word[0].toUpperCase())
-      .join('');
-  }, [item.title]);
+  const previewText = item.summary || "";
+  const fullText = item.content || "No full content available.";
 
   return (
     <div
@@ -53,7 +40,7 @@ export default function NewsCard({ item, index, categorySlug = "all" }: { item: 
               />
             ) : (
               <div className="text-5xl font-bold text-white/40 select-none tracking-tighter">
-                {initials}
+                {item.initials}
               </div>
             )}
           </div>
@@ -76,7 +63,9 @@ export default function NewsCard({ item, index, categorySlug = "all" }: { item: 
           <CardContent className="space-y-4 flex-1 flex flex-col pb-4">
             {previewText && (
               <div className="text-sm text-muted-foreground line-clamp-3">
-                <SafeHTML html={previewText} />
+                {/* ⚡ Bolt Optimization: summary is now plain text from server,
+                    avoiding an unnecessary SafeHTML (DOMPurify) call here. */}
+                {previewText}
               </div>
             )}
 
@@ -124,13 +113,14 @@ export default function NewsCard({ item, index, categorySlug = "all" }: { item: 
           <CardHeader className="p-0 mb-4 shrink-0">
             <CardTitle className="text-lg line-clamp-3">{item.title}</CardTitle>
             <div className="flex items-center gap-3 text-xs text-muted-foreground mt-2 border-b pb-2">
-              {item.publishedAt && <span>Published {formatFullDateTime(item.publishedAt)}</span>}
+              {item.publishedAtFull && <span>Published {item.publishedAtFull}</span>}
             </div>
           </CardHeader>
 
           <CardContent className="p-0 flex-1 overflow-y-auto min-h-0 pr-2 scrollbar-thin">
             <div className="text-sm leading-relaxed text-foreground">
-              <SafeHTML html={fullText} />
+              {/* ⚡ Bolt Optimization: Defer full content rendering until flipped */}
+              {isFlipped && <SafeHTML html={fullText} />}
             </div>
           </CardContent>
 
