@@ -1,4 +1,18 @@
 
+// Mock variables must start with 'mock' to be used in jest.mock() and are hoisted
+const mockFind = jest.fn().mockReturnValue({
+    project: jest.fn().mockReturnThis(),
+    sort: jest.fn().mockReturnThis(),
+    skip: jest.fn().mockReturnThis(),
+    limit: jest.fn().mockReturnThis(),
+    toArray: jest.fn().mockResolvedValue([]),
+});
+const mockCountDocuments = jest.fn().mockResolvedValue(0);
+const mockEstimatedDocumentCount = jest.fn().mockResolvedValue(0);
+const mockAggregate = jest.fn().mockReturnValue({
+    toArray: jest.fn().mockResolvedValue([]),
+});
+
 // Mock ObjectId to avoid bson ESM issue
 jest.mock('mongodb', () => ({
     ObjectId: jest.fn().mockImplementation((id) => ({
@@ -7,9 +21,41 @@ jest.mock('mongodb', () => ({
     })),
 }));
 
-import { mapDocumentToResult, extractFirstImage } from '@/lib/newsService';
+jest.mock('@/lib/mongodb', () => {
+    // We can't reference mock variables directly here if they are not defined in this scope
+    // But Jest hoists jest.mock and variables starting with 'mock'
+    return {
+        getDb: jest.fn().mockResolvedValue({
+            collection: jest.fn().mockReturnValue({
+                find: jest.fn().mockReturnValue({
+                    project: jest.fn().mockReturnThis(),
+                    sort: jest.fn().mockReturnThis(),
+                    skip: jest.fn().mockReturnThis(),
+                    limit: jest.fn().mockReturnThis(),
+                    toArray: jest.fn().mockResolvedValue([]),
+                }),
+                countDocuments: jest.fn().mockResolvedValue(0),
+                estimatedDocumentCount: jest.fn().mockResolvedValue(0),
+                aggregate: jest.fn().mockReturnValue({
+                    toArray: jest.fn().mockResolvedValue([]),
+                }),
+            }),
+        }),
+    };
+});
 
-describe('Security: URL Validation in newsService', () => {
+import { mapDocumentToResult, extractFirstImage, fetchCryptoNews, fetchCategoryCounts } from '@/lib/newsService';
+import { getDb } from '@/lib/mongodb';
+
+describe('Security: newsService protections', () => {
+    let mockCol: any;
+
+    beforeEach(async () => {
+        jest.clearAllMocks();
+        const db = await getDb();
+        mockCol = (db.collection as jest.Mock)();
+    });
+
     describe('mapDocumentToResult', () => {
         it('should NOT allow javascript: protocol in canonicalUrl', () => {
             const maliciousDoc = {
@@ -65,6 +111,36 @@ describe('Security: URL Validation in newsService', () => {
             };
             const result = extractFirstImage(dataImage);
             expect(result).toBe(dataImage.primary);
+        });
+    });
+
+    describe('fetchCryptoNews: NoSQL Injection protection', () => {
+        it('should ignore non-string categoryName to prevent query operator injection', async () => {
+            const maliciousCategory = { $ne: null } as unknown as string;
+            await fetchCryptoNews(10, 0, maliciousCategory);
+            expect(mockCol.find).toHaveBeenCalledWith({});
+        });
+
+        it('should use string categoryName correctly', async () => {
+            await fetchCryptoNews(10, 0, 'AI');
+            expect(mockCol.find).toHaveBeenCalledWith({ "category.categoryName": 'AI' });
+        });
+    });
+
+    describe('fetchCategoryCounts: Prototype Pollution protection', () => {
+        it('should NOT allow prototype pollution via malicious category names', async () => {
+            mockCol.aggregate().toArray.mockResolvedValueOnce([
+                { _id: 'AI', count: 5 },
+                { _id: '__proto__', count: 100 },
+                { _id: 'constructor', count: 50 }
+            ]);
+
+            const counts = await fetchCategoryCounts();
+
+            expect(counts['AI']).toBe(5);
+            expect(counts['__proto__']).toBeUndefined();
+            expect(counts['constructor']).toBeUndefined();
+            expect(Object.getPrototypeOf(counts)).toBeNull();
         });
     });
 });

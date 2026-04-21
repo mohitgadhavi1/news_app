@@ -47,7 +47,9 @@ export async function fetchCryptoNews(limit = 12, skip = 0, categoryName?: strin
     const db = await getDb();
     const col = db.collection<CryptoNewsDocument>("external_news");
 
-    const query = categoryName ? { "category.categoryName": categoryName } : {};
+    // ✅ Security: Ensure categoryName is a string to prevent NoSQL injection if called with unvalidated input
+    const validatedCategory = typeof categoryName === 'string' ? categoryName : undefined;
+    const query = validatedCategory ? { "category.categoryName": validatedCategory } : {};
 
     const [docs, total] = await Promise.all([
         col
@@ -88,10 +90,14 @@ export async function fetchCategoryCounts() {
         { $group: { _id: "$category.categoryName", count: { $sum: 1 } } }
     ]).toArray();
 
+    // ✅ Security: Use Object.create(null) and validate keys to prevent prototype pollution from DB data
     return counts.reduce((acc, curr) => {
-        acc[curr._id] = curr.count;
+        const key = String(curr._id);
+        if (key !== "__proto__" && key !== "constructor") {
+            acc[key] = curr.count;
+        }
         return acc;
-    }, {} as Record<string, number>);
+    }, Object.create(null) as Record<string, number>);
 }
 
 export async function fetchArticleById(id: string) {
