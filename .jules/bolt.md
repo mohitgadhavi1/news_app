@@ -15,3 +15,7 @@
 ## 2025-05-20 - [Efficient Date Formatting]
 **Learning:** The `Intl` API (`toLocaleDateString`, `toLocaleString`) is surprisingly heavy when used inside the render loop of large lists (like news feeds). It creates significant overhead and can cause hydration mismatches if not handled carefully.
 **Action:** Use manual string building for simple date formats in performance-critical components. Pre-formatting dates in the service layer or using lightweight utilities in `utils.ts` can drastically reduce rendering time per item.
+
+## 2026-04-21 - [Server-Side Data Pre-processing]
+**Learning:** Offloading string computations (initials, date formatting) and HTML sanitization to the server significantly reduces client-side JS execution and hydration time. Additionally, generating a plain-text summary from HTML on the server reduces the RSC payload size by avoiding sending large HTML strings twice (once as raw content and once as "summary").
+**Action:** Always pre-process display data in the service/mapping layer on the server. Defer rendering of complex UI components (like sanitized HTML blocks) until they are actually needed by the user.
