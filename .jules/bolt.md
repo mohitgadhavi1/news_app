@@ -19,3 +19,7 @@
 ## 2026-04-21 - [Server-Side Data Pre-processing]
 **Learning:** Offloading string computations (initials, date formatting) and HTML sanitization to the server significantly reduces client-side JS execution and hydration time. Additionally, generating a plain-text summary from HTML on the server reduces the RSC payload size by avoiding sending large HTML strings twice (once as raw content and once as "summary").
 **Action:** Always pre-process display data in the service/mapping layer on the server. Defer rendering of complex UI components (like sanitized HTML blocks) until they are actually needed by the user.
+
+## 2026-04-28 - [Client-Side Navigation]
+**Learning:** Using standard `<a>` tags or `window.location.href` in a Next.js App Router environment triggers full-page reloads, discarding client-side state and causing unnecessary re-fetching of layout data.
+**Action:** Always use Next.js `Link` component or `router.push` for internal navigation to enable fast, client-side routing. Use `asChild` with `Link` when wrapping complex UI components (like Radix/Shadcn buttons) to maintain accessibility and correct HTML structure.

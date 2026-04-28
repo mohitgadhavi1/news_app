@@ -1,6 +1,7 @@
 "use client"
 
 import React from "react"
+import Link from "next/link"
 import { ChevronRight, type LucideIcon } from "lucide-react"
 
 import {
@@ -57,10 +58,11 @@ export function NavMain({
           <React.Fragment key={group.title}>
             {group.items?.map((item) => (
               <SidebarMenuItem key={item.title}>
+                {/* ⚡ Bolt Optimization: Use Link for client-side navigation to avoid full page reloads */}
                 <SidebarMenuButton asChild tooltip={item.title}>
-                  <a href={item.url}>
+                  <Link href={item.url}>
                     <span>{item.title}</span>
-                  </a>
+                  </Link>
                 </SidebarMenuButton>
                 <SidebarMenuBadge>{counts[item.title] ?? 0}</SidebarMenuBadge>
               </SidebarMenuItem>
