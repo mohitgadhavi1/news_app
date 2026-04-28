@@ -33,6 +33,7 @@ import { Sun, Moon, Laptop } from "lucide-react";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import applyTheme, { Theme } from "@/lib/applyTheme";
 import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 import { getStoredAuth, fetchUserInfo, redirectToLogin, logout, getBasicUserFromUrlOrToken, ZidbitUser } from "@/lib/auth"
 import { isValidImageUrl } from "@/lib/utils";
 
@@ -41,6 +42,7 @@ const STORAGE_KEY = "theme-preference";
 
 export function NavUser() {
   const { isMobile } = useSidebar();
+  const router = useRouter();
   // Theme logic
   const [theme, setTheme] = useState<Theme>(() => {
     try {
@@ -214,7 +216,8 @@ export function NavUser() {
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem onClick={() => window.location.href = "/account"}>
+              {/* ⚡ Bolt Optimization: Use router.push for client-side navigation */}
+              <DropdownMenuItem onClick={() => router.push("/account")}>
                 <BadgeCheck />
                 Account
               </DropdownMenuItem>
