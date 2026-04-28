@@ -48,6 +48,7 @@ import { mapDocumentToResult, extractFirstImage, fetchCryptoNews, fetchCategoryC
 import { getDb } from '@/lib/mongodb';
 
 describe('Security: newsService protections', () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let mockCol: any;
 
     beforeEach(async () => {

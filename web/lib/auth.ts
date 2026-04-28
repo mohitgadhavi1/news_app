@@ -1,5 +1,6 @@
 // Zidbit Auth integration utility
 // Handles login redirect, callback, token storage, and user info fetch
+import { isValidImageUrl } from "./utils";
 
 const AUTH_URL = process.env.NEXT_PUBLIC_AUTH_URL || "https://auth.zidbit.com/";
 const ME_URL = (AUTH_URL.endsWith("/") ? AUTH_URL : AUTH_URL + "/") + "me";
@@ -62,7 +63,8 @@ export function getBasicUserFromUrlOrToken(providedToken?: string) {
         const token = urlParams.get("token") || providedToken || getStoredAuth().token || undefined;
         const email = urlParams.get("email");
         const name = urlParams.get("name");
-        const picture = urlParams.get("picture");
+        const rawPicture = urlParams.get("picture");
+        const picture = isValidImageUrl(rawPicture) ? rawPicture : undefined;
         const uid = urlParams.get("uid") || getStoredAuth().uid;
 
         if (token && (email || name || picture || uid)) {
@@ -75,10 +77,11 @@ export function getBasicUserFromUrlOrToken(providedToken?: string) {
     if (token) {
         try {
             const payload = JSON.parse(atob(token.split(".")[1]));
+            const picture = isValidImageUrl(payload.picture) ? payload.picture : undefined;
             return {
                 email: payload.email || "Details unavailable",
                 name: payload.name || "Unknown User",
-                picture: payload.picture || undefined,
+                picture,
                 uid: payload.user_id || payload.uid || "Unknown",
             };
         } catch {

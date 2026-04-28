@@ -76,7 +76,7 @@ export default function AccountPage() {
             <div className="flex flex-col items-center gap-4">
               <Avatar className="w-24 h-24">
                 {isValidImageUrl(user.picture) ? (
-                  <AvatarImage src={user.picture!} alt={user.name || user.email} />
+                  <AvatarImage src={user.picture!} alt={user.name || user.email || "Avatar"} />
                 ) : null}
                 <AvatarFallback>{(user.name || user.email || "U").slice(0, 2).toUpperCase()}</AvatarFallback>
               </Avatar>
