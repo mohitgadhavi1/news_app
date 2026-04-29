@@ -34,13 +34,15 @@ export default function NewsCard({ item, index, categorySlug = "all" }: { item: 
 
   return (
     <div
-      className="group w-full h-[450px] [perspective:1000px] cursor-pointer"
-      onClick={() => setIsFlipped(!isFlipped)}
+      className="group w-full h-[450px] [perspective:1000px]"
     >
       <div className={`relative w-full h-full transition-transform duration-700 [transform-style:preserve-3d] ${isFlipped ? '[transform:rotateY(180deg)]' : ''}`}>
 
         {/* Front of Card */}
-        <Card className="absolute inset-0 w-full h-full overflow-hidden hover:shadow-md transition flex flex-col [backface-visibility:hidden]">
+        <Card
+          className="absolute inset-0 w-full h-full overflow-hidden hover:shadow-md transition flex flex-col [backface-visibility:hidden] cursor-pointer"
+          onClick={() => setIsFlipped(true)}
+        >
           <div className="relative w-full h-48 bg-linear-to-br from-gray-600 to-gray-800 shrink-0 flex items-center justify-center">
             {primaryImage && !imgError ? (
               <Image
@@ -108,19 +110,37 @@ export default function NewsCard({ item, index, categorySlug = "all" }: { item: 
                   </Badge>
                   {item.publishedAt && <span className="truncate">{new Date(item.publishedAt).toLocaleDateString()}</span>}
                 </div>
-                {item.commentCount !== undefined && item.commentCount > 0 && (
-                  <span className="flex items-center gap-1">
-                    <MessageSquare className="h-3 w-3" />
-                    {item.commentCount}
-                  </span>
-                )}
+                <div className="flex items-center gap-2">
+                  {item.commentCount !== undefined && item.commentCount > 0 && (
+                    <span className="flex items-center gap-1 mr-1">
+                      <MessageSquare className="h-3 w-3" />
+                      {item.commentCount}
+                    </span>
+                  )}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-[10px] px-2"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsFlipped(true);
+                    }}
+                    tabIndex={isFlipped ? -1 : 0}
+                    aria-label="Show summary"
+                  >
+                    Summary
+                  </Button>
+                </div>
               </div>
             </div>
           </CardContent>
         </Card>
 
         {/* Back of Card */}
-        <Card className="absolute inset-0 w-full h-full overflow-hidden hover:shadow-md transition flex flex-col p-6 [backface-visibility:hidden] [transform:rotateY(180deg)]">
+        <Card
+          className="absolute inset-0 w-full h-full overflow-hidden hover:shadow-md transition flex flex-col p-6 [backface-visibility:hidden] [transform:rotateY(180deg)] cursor-pointer"
+          onClick={() => setIsFlipped(false)}
+        >
           <CardHeader className="p-0 mb-4 shrink-0">
             <CardTitle className="text-lg line-clamp-3">{item.title}</CardTitle>
             <div className="flex items-center gap-3 text-xs text-muted-foreground mt-2 border-b pb-2">
@@ -135,15 +155,25 @@ export default function NewsCard({ item, index, categorySlug = "all" }: { item: 
           </CardContent>
 
           <div className="mt-4 pt-4 border-t flex justify-between items-center shrink-0">
-            <div className="text-xs text-muted-foreground">
-              Click to flip back
-            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-xs h-8"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsFlipped(false);
+              }}
+              tabIndex={isFlipped ? 0 : -1}
+            >
+              Back
+            </Button>
             <div className="flex gap-2">
               <Button
                 variant="outline"
                 size="sm"
                 asChild
                 onClick={(e) => e.stopPropagation()}
+                tabIndex={isFlipped ? 0 : -1}
               >
                 <Link href={`/category/${categorySlug}/article/${item.id}`}>
                   View Details
@@ -154,6 +184,7 @@ export default function NewsCard({ item, index, categorySlug = "all" }: { item: 
                 size="sm"
                 asChild
                 onClick={(e) => e.stopPropagation()}
+                tabIndex={isFlipped ? 0 : -1}
               >
                 <a
                   href={officialUrl}
