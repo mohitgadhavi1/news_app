@@ -115,16 +115,38 @@ describe('Security: newsService protections', () => {
         });
     });
 
-    describe('fetchCryptoNews: NoSQL Injection protection', () => {
+    describe('fetchCryptoNews: Input validation and DoS protection', () => {
         it('should ignore non-string categoryName to prevent query operator injection', async () => {
             const maliciousCategory = { $ne: null } as unknown as string;
             await fetchCryptoNews(10, 0, maliciousCategory);
             expect(mockCol.find).toHaveBeenCalledWith({});
         });
 
+        it('should ignore overly long categoryName', async () => {
+            const longCategory = 'A'.repeat(101);
+            await fetchCryptoNews(10, 0, longCategory);
+            expect(mockCol.find).toHaveBeenCalledWith({});
+        });
+
         it('should use string categoryName correctly', async () => {
             await fetchCryptoNews(10, 0, 'AI');
             expect(mockCol.find).toHaveBeenCalledWith({ "category.categoryName": 'AI' });
+        });
+
+        it('should cap limit at 100', async () => {
+            await fetchCryptoNews(500, 0);
+            expect(mockCol.find().limit).toHaveBeenCalledWith(100);
+        });
+
+        it('should cap skip at 6000', async () => {
+            await fetchCryptoNews(10, 10000);
+            expect(mockCol.find().skip).toHaveBeenCalledWith(6000);
+        });
+
+        it('should handle negative limit and skip', async () => {
+            await fetchCryptoNews(-5, -10);
+            expect(mockCol.find().limit).toHaveBeenCalledWith(12);
+            expect(mockCol.find().skip).toHaveBeenCalledWith(0);
         });
     });
 
@@ -133,7 +155,8 @@ describe('Security: newsService protections', () => {
             mockCol.aggregate().toArray.mockResolvedValueOnce([
                 { _id: 'AI', count: 5 },
                 { _id: '__proto__', count: 100 },
-                { _id: 'constructor', count: 50 }
+                { _id: 'constructor', count: 50 },
+                { _id: 'prototype', count: 75 }
             ]);
 
             const counts = await fetchCategoryCounts();
@@ -141,6 +164,7 @@ describe('Security: newsService protections', () => {
             expect(counts['AI']).toBe(5);
             expect(counts['__proto__']).toBeUndefined();
             expect(counts['constructor']).toBeUndefined();
+            expect(counts['prototype']).toBeUndefined();
             expect(Object.getPrototypeOf(counts)).toBeNull();
         });
     });

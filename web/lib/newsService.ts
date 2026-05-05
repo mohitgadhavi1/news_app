@@ -50,8 +50,15 @@ export async function fetchCryptoNews(limit = 12, skip = 0, categoryName?: strin
     const db = await getDb();
     const col = db.collection<CryptoNewsDocument>("external_news");
 
-    // ✅ Security: Ensure categoryName is a string to prevent NoSQL injection if called with unvalidated input
-    const validatedCategory = typeof categoryName === 'string' ? categoryName : undefined;
+    // ✅ Security: Harden inputs to prevent NoSQL injection, DoS, and memory exhaustion
+    const numLimit = Number(limit);
+    const validatedLimit = (isNaN(numLimit) || numLimit <= 0) ? 12 : Math.min(100, numLimit);
+    const numSkip = Number(skip);
+    const validatedSkip = (isNaN(numSkip) || numSkip <= 0) ? 0 : Math.min(6000, numSkip);
+    const validatedCategory = (typeof categoryName === 'string' && categoryName.length < 100)
+        ? categoryName
+        : undefined;
+
     const query = validatedCategory ? { "category.categoryName": validatedCategory } : {};
 
     const [docs, total] = await Promise.all([
@@ -72,8 +79,8 @@ export async function fetchCryptoNews(limit = 12, skip = 0, categoryName?: strin
                 commentCount: 1
             })
             .sort({ publishOn: -1 })
-            .skip(skip)
-            .limit(limit)
+            .skip(validatedSkip)
+            .limit(validatedLimit)
             .toArray(),
         categoryName ? col.countDocuments(query) : col.estimatedDocumentCount()
     ]);
@@ -96,7 +103,7 @@ export async function fetchCategoryCounts() {
     // ✅ Security: Use Object.create(null) and validate keys to prevent prototype pollution from DB data
     return counts.reduce((acc, curr) => {
         const key = String(curr._id);
-        if (key !== "__proto__" && key !== "constructor") {
+        if (key !== "__proto__" && key !== "constructor" && key !== "prototype") {
             acc[key] = curr.count;
         }
         return acc;
