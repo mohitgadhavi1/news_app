@@ -30,6 +30,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 import { Sun, Moon, Laptop } from "lucide-react";
+import Link from "next/link";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import applyTheme, { Theme } from "@/lib/applyTheme";
 import { useEffect, useState } from "react"
@@ -214,9 +215,11 @@ export function NavUser() {
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem onClick={() => window.location.href = "/account"}>
-                <BadgeCheck />
-                Account
+              <DropdownMenuItem asChild>
+                <Link href="/account">
+                  <BadgeCheck />
+                  Account
+                </Link>
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <CreditCard />

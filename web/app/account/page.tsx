@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react"
 import { fetchUserInfo, getStoredAuth, logout, getBasicUserFromUrlOrToken, ZidbitUser } from "@/lib/auth"
 import { isValidImageUrl } from "@/lib/utils"
+import Link from "next/link"
 // AppSidebar and SidebarProvider are now global in layout
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -106,7 +107,9 @@ export default function AccountPage() {
           {user ? (
             <Button variant="destructive" className="w-full" onClick={logout}>Log out</Button>
           ) : (
-            <Button className="w-full" onClick={() => window.location.href = "/"}>Go Home</Button>
+            <Button className="w-full" asChild>
+              <Link href="/">Go Home</Link>
+            </Button>
           )}
         </CardFooter>
       </Card>

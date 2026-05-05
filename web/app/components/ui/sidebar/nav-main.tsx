@@ -2,6 +2,7 @@
 
 import React from "react"
 import { ChevronRight, type LucideIcon } from "lucide-react"
+import Link from "next/link"
 
 import {
   Collapsible,
@@ -58,9 +59,9 @@ export function NavMain({
             {group.items?.map((item) => (
               <SidebarMenuItem key={item.title}>
                 <SidebarMenuButton asChild tooltip={item.title}>
-                  <a href={item.url}>
+                  <Link href={item.url}>
                     <span>{item.title}</span>
-                  </a>
+                  </Link>
                 </SidebarMenuButton>
                 <SidebarMenuBadge>{counts[item.title] ?? 0}</SidebarMenuBadge>
               </SidebarMenuItem>
