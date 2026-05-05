@@ -12,3 +12,8 @@
 **Vulnerability:** Dynamic query filters were not type-checked, allowing object injection (NoSQLi). Aggregation results were reduced into objects without prototype protection, allowing malicious keys (Prototype Pollution).
 **Learning:** Data from the database should be treated with caution similar to user input when used to build objects or as keys.
 **Prevention:** Type-check query parameters at the service layer. Use `Object.create(null)` and filter keys like `__proto__` when building objects from dynamic data.
+
+## 2025-05-18 - [DoS via Deep Paging and Resource Exhaustion]
+**Vulnerability:** Unvalidated `limit` and `skip` parameters in news queries allowed "Deep Paging" and massive result sets, which could exhaust database resources and application memory (DoS).
+**Learning:** Even if the UI limits pagination, the underlying API/Service layer must enforce strict bounds on resource-intensive parameters like MongoDB's `limit` and `skip`.
+**Prevention:** Always validate and cap pagination parameters at the service layer. Implement reasonable upper bounds (e.g., limit=100, skip=6000).
