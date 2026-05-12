@@ -139,7 +139,11 @@ export function mapDocumentToResult(doc: CryptoNewsDocument): CryptoNewsResult {
 
     // ⚡ Bolt Optimization: Sanitize HTML on the server and create a plain-text summary
     // to reduce RSC payload size and client-side processing.
-    const sanitizedContent = DOMPurify.sanitize(rawContent);
+    // ✅ Security: Cap content length to prevent CPU/memory exhaustion during sanitization
+    const contentToSanitize = rawContent.length > 500000
+        ? rawContent.substring(0, 500000) + "... [content truncated]"
+        : rawContent;
+    const sanitizedContent = DOMPurify.sanitize(contentToSanitize);
     const summary = sanitizedContent
         .replace(/<[^>]*>/g, ' ')
         .replace(/\s+/g, ' ')

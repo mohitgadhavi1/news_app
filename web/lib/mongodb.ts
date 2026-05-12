@@ -19,7 +19,11 @@ export async function getDb(): Promise<Db> {
         throw new Error("MONGODB_URI environment variable is required");
     }
 
-    const client = new MongoClient(uri);
+    // ✅ Security: Add timeouts to prevent application from hanging indefinitely
+    const client = new MongoClient(uri, {
+        connectTimeoutMS: 5000,
+        serverSelectionTimeoutMS: 5000,
+    });
     await client.connect();
 
     cachedClient = client;
