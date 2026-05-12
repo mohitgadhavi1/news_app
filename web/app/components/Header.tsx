@@ -16,14 +16,37 @@ import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { useSidebar } from "@/components/ui/sidebar"
 import Link from "next/link"
-
-
-
-
+import { usePathname } from "next/navigation"
+import { categories } from "@/lib/categories"
+import * as React from "react"
 
 export default function Header() {
-  const { toggleSidebar, } = useSidebar()
+  const { toggleSidebar } = useSidebar()
+  const pathname = usePathname()
 
+  const breadcrumbs = React.useMemo(() => {
+    const parts = pathname.split("/").filter(Boolean)
+    const crumbs: { label: string; href: string | null }[] = []
+
+    if (parts[0] === "category" && parts[1]) {
+      const category = categories.find((c) => c.slug === parts[1])
+      if (category) {
+        if (parts[2] === "article") {
+          crumbs.push({
+            label: category.name,
+            href: `/category/${category.slug}`,
+          })
+          crumbs.push({ label: "Article", href: null })
+        } else {
+          crumbs.push({ label: category.name, href: null })
+        }
+      }
+    } else if (pathname === "/") {
+      crumbs.push({ label: "All", href: null })
+    }
+
+    return crumbs
+  }, [pathname])
 
   return (
     <header className="bg-background sticky top-0 z-50 flex w-full items-center border-b ">
@@ -41,14 +64,24 @@ export default function Header() {
         <Breadcrumb className="hidden sm:block">
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink href="#">
-                Category
+              <BreadcrumbLink asChild>
+                <Link href="/">News</Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage>All</BreadcrumbPage>
-            </BreadcrumbItem>
+            {breadcrumbs.map((crumb, i) => (
+              <React.Fragment key={i}>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  {crumb.href ? (
+                    <BreadcrumbLink asChild>
+                      <Link href={crumb.href}>{crumb.label}</Link>
+                    </BreadcrumbLink>
+                  ) : (
+                    <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
+                  )}
+                </BreadcrumbItem>
+              </React.Fragment>
+            ))}
           </BreadcrumbList>
         </Breadcrumb>
 
