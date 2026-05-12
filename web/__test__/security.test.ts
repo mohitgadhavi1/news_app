@@ -58,6 +58,21 @@ describe('Security: newsService protections', () => {
     });
 
     describe('mapDocumentToResult', () => {
+        it('should cap content length to 500,000 characters', () => {
+            const longContent = 'A'.repeat(600000);
+            const doc = {
+                _id: 'fake-id' as unknown as never,
+                title: 'Long Article',
+                content: longContent,
+                source: 'test-source'
+            };
+
+            const result = mapDocumentToResult(doc);
+
+            expect(result.content?.length).toBeLessThanOrEqual(500000 + 50); // Allowing for truncation message
+            expect(result.content).toContain('[content truncated]');
+        });
+
         it('should NOT allow javascript: protocol in canonicalUrl', () => {
             const maliciousDoc = {
                 _id: 'fake-id' as unknown as never,
@@ -88,6 +103,17 @@ describe('Security: newsService protections', () => {
     });
 
     describe('extractFirstImage', () => {
+        it('should NOT allow overly long URLs', () => {
+            const longUrl = 'https://example.com/' + 'A'.repeat(2100);
+            const maliciousImages = {
+                primary: longUrl
+            };
+
+            const result = extractFirstImage(maliciousImages);
+
+            expect(result).toBeNull();
+        });
+
         it('should NOT allow javascript: protocol in images', () => {
             const maliciousImages = {
                 primary: 'javascript:alert("image-xss")'

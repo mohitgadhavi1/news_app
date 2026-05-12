@@ -17,3 +17,8 @@
 **Vulnerability:** Unvalidated `limit` and `skip` parameters in news queries allowed "Deep Paging" and massive result sets, which could exhaust database resources and application memory (DoS).
 **Learning:** Even if the UI limits pagination, the underlying API/Service layer must enforce strict bounds on resource-intensive parameters like MongoDB's `limit` and `skip`.
 **Prevention:** Always validate and cap pagination parameters at the service layer. Implement reasonable upper bounds (e.g., limit=100, skip=6000).
+
+## 2025-05-19 - [DoS via Large String Payloads and Connection Hanging]
+**Vulnerability:** Lack of length limits on news content and URLs, combined with missing database timeouts, exposed the application to resource exhaustion (CPU/Memory) and process hanging.
+**Learning:** External data (even from "trusted" news sources) can contain massive payloads that choke sanitization libraries (DOMPurify) or URL parsers. Missing DB timeouts can cause serverless functions or containers to hang indefinitely on network issues.
+**Prevention:** Enforce strict length limits on all external strings before processing (e.g., 500k for content, 2k for URLs). Always configure `connectTimeoutMS` and `serverSelectionTimeoutMS` on database clients.
