@@ -1,6 +1,6 @@
 import { ObjectId } from "mongodb";
 import { getDb } from "./mongodb";
-import { isValidUrl, isValidImageUrl, formatSimpleDate, formatFullDateTime } from "./utils";
+import { isValidUrl, isValidImageUrl, formatSimpleDate, formatFullDateTime, formatLongDate } from "./utils";
 import DOMPurify from "isomorphic-dompurify";
 
 // ✅ Fixed document interface
@@ -36,6 +36,7 @@ export interface CryptoNewsResult {
     source: string;
     publishedAt: string | null;
     publishedAtFull: string | null;
+    publishedAtLong: string | null;
     initials: string;
     imageUrl: string | null;
     categoryName: string | null;
@@ -159,6 +160,7 @@ export function mapDocumentToResult(doc: CryptoNewsDocument): CryptoNewsResult {
         source: doc.source ?? "seeking-alpha",
         publishedAt: formatSimpleDate(doc.publishOn),
         publishedAtFull: formatFullDateTime(doc.publishOn),
+        publishedAtLong: formatLongDate(doc.publishOn),
         initials,
         imageUrl: extractFirstImage(doc.images),
         categoryName: doc.category?.categoryName ?? null,
