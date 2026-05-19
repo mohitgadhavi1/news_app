@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -17,6 +17,23 @@ const SafeHTML = dynamic(
 export default function NewsCard({ item, index, categorySlug = "all" }: { item: NewsItem, index: number, categorySlug?: string }) {
   const [isFlipped, setIsFlipped] = useState(false);
   const [imgError, setImgError] = useState(false);
+
+  const summaryBtnRef = useRef<HTMLButtonElement>(null);
+  const backBtnRef = useRef<HTMLButtonElement>(null);
+  const isFirstRender = useRef(true);
+
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+
+    if (isFlipped) {
+      backBtnRef.current?.focus();
+    } else {
+      summaryBtnRef.current?.focus();
+    }
+  }, [isFlipped]);
 
   const primaryImage = item.images?.primary || item.imageUrl;
   const officialUrl = item.canonicalUrl || item.url || "#";
@@ -118,6 +135,7 @@ export default function NewsCard({ item, index, categorySlug = "all" }: { item: 
                     </span>
                   )}
                   <Button
+                    ref={summaryBtnRef}
                     variant="outline"
                     size="sm"
                     className="h-7 text-[10px] px-2"
@@ -127,6 +145,7 @@ export default function NewsCard({ item, index, categorySlug = "all" }: { item: 
                     }}
                     tabIndex={isFlipped ? -1 : 0}
                     aria-label="Show summary"
+                    aria-expanded={isFlipped}
                   >
                     Summary
                   </Button>
@@ -156,6 +175,7 @@ export default function NewsCard({ item, index, categorySlug = "all" }: { item: 
 
           <div className="mt-4 pt-4 border-t flex justify-between items-center shrink-0">
             <Button
+              ref={backBtnRef}
               variant="ghost"
               size="sm"
               className="text-xs h-8"
