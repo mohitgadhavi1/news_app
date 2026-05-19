@@ -14,21 +14,27 @@ export function redirectToLogin() {
 }
 
 export function handleAuthCallback() {
+    if (typeof window === 'undefined') return null;
+
     const urlParams = new URLSearchParams(window.location.search);
     const token = urlParams.get('token');
     const expiresAt = urlParams.get('expiresAt');
     const uid = urlParams.get('uid');
 
-    // ✅ Security: Basic validation of parameters
-    if (token && typeof token === 'string' && token.length > 20) {
-        localStorage.setItem(TOKEN_KEY, token);
+    // ✅ Security: Harden validation with length limits
+    if (token && typeof token === 'string' && token.length > 20 && token.length < 4096) {
+        try {
+            localStorage.setItem(TOKEN_KEY, token);
 
-        if (expiresAt && !isNaN(Number(expiresAt))) {
-            localStorage.setItem(EXPIRY_KEY, expiresAt);
-        }
+            if (expiresAt && expiresAt.length < 32 && !isNaN(Number(expiresAt))) {
+                localStorage.setItem(EXPIRY_KEY, expiresAt);
+            }
 
-        if (uid && typeof uid === 'string' && uid.length > 0) {
-            localStorage.setItem(UID_KEY, uid);
+            if (uid && typeof uid === 'string' && uid.length > 0 && uid.length < 128) {
+                localStorage.setItem(UID_KEY, uid);
+            }
+        } catch (e) {
+            console.error("Failed to store auth tokens in localStorage", e);
         }
 
         // Clean URL
@@ -39,17 +45,27 @@ export function handleAuthCallback() {
 }
 
 export function getStoredAuth() {
-    return {
-        token: typeof window !== 'undefined' ? localStorage.getItem(TOKEN_KEY) : null,
-        expiresAt: typeof window !== 'undefined' ? localStorage.getItem(EXPIRY_KEY) : null,
-        uid: typeof window !== 'undefined' ? localStorage.getItem(UID_KEY) : null,
-    };
+    if (typeof window === 'undefined') return { token: null, expiresAt: null, uid: null };
+
+    try {
+        return {
+            token: localStorage.getItem(TOKEN_KEY),
+            expiresAt: localStorage.getItem(EXPIRY_KEY),
+            uid: localStorage.getItem(UID_KEY),
+        };
+    } catch {
+        return { token: null, expiresAt: null, uid: null };
+    }
 }
 
 export function logout() {
-    localStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem(EXPIRY_KEY);
-    localStorage.removeItem(UID_KEY);
+    if (typeof window === 'undefined') return;
+
+    try {
+        localStorage.removeItem(TOKEN_KEY);
+        localStorage.removeItem(EXPIRY_KEY);
+        localStorage.removeItem(UID_KEY);
+    } catch { }
     window.location.reload();
 }
 
@@ -64,25 +80,42 @@ export function getBasicUserFromUrlOrToken(providedToken?: string) {
         const email = urlParams.get("email");
         const name = urlParams.get("name");
         const rawPicture = urlParams.get("picture");
-        const picture = isValidImageUrl(rawPicture) ? rawPicture : undefined;
-        const uid = urlParams.get("uid") || getStoredAuth().uid;
 
-        if (token && (email || name || picture || uid)) {
-            return { email, name, picture, uid };
+        // ✅ Security: Apply length limits to URL parameters
+        const validatedEmail = (email && email.length < 255) ? email : null;
+        const validatedName = (name && name.length < 255) ? name : null;
+        const picture = (rawPicture && rawPicture.length < 2048 && isValidImageUrl(rawPicture)) ? rawPicture : undefined;
+        const uid = urlParams.get("uid") || getStoredAuth().uid;
+        const validatedUid = (uid && uid.length < 128) ? uid : null;
+
+        if (token && (validatedEmail || validatedName || picture || validatedUid)) {
+            return { email: validatedEmail, name: validatedName, picture, uid: validatedUid };
         }
     }
 
     // Try to decode JWT for email/name/picture
     const token = providedToken || getStoredAuth().token;
-    if (token) {
+    // ✅ Security: Verify JWT format and use safe Base64URL decoding
+    if (token && typeof token === 'string' && token.split('.').length === 3) {
         try {
-            const payload = JSON.parse(atob(token.split(".")[1]));
-            const picture = isValidImageUrl(payload.picture) ? payload.picture : undefined;
+            const base64Url = token.split(".")[1];
+            const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+            const jsonPayload = decodeURIComponent(
+                atob(base64)
+                    .split("")
+                    .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+                    .join("")
+            );
+            const payload = JSON.parse(jsonPayload);
+            const picture = (payload.picture && payload.picture.length < 2048 && isValidImageUrl(payload.picture))
+                ? payload.picture
+                : undefined;
+
             return {
-                email: payload.email || "Details unavailable",
-                name: payload.name || "Unknown User",
+                email: (payload.email && payload.email.length < 255) ? payload.email : "Details unavailable",
+                name: (payload.name && payload.name.length < 255) ? payload.name : "Unknown User",
                 picture,
-                uid: payload.user_id || payload.uid || "Unknown",
+                uid: (payload.sub || payload.user_id || payload.uid || "Unknown").substring(0, 128),
             };
         } catch {
             return {
