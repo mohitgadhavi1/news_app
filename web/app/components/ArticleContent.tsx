@@ -1,5 +1,3 @@
-"use client";
-
 import SafeHTML from "@/lib/SafeHtml";
 
 export default function ArticleContent({ content }: { content: string }) {

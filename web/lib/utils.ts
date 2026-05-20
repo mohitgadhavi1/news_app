@@ -66,3 +66,19 @@ export function formatFullDateTime(item: string | Date | undefined): string | nu
 
   return `${date} ${time}`;
 }
+
+const MONTHS = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December"
+];
+
+/**
+ * ⚡ Bolt Optimization: Efficient long date formatting (Month DD, YYYY) that avoids the heavy Intl API.
+ */
+export function formatLongDate(item: string | Date | undefined): string | null {
+  if (!item) return null;
+  const d = new Date(item);
+  if (isNaN(d.getTime())) return null;
+
+  return `${MONTHS[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
+}

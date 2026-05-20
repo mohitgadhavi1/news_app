@@ -1,21 +1,20 @@
 // SafeHTML.tsx
-import React from 'react';
-import DOMPurify from 'isomorphic-dompurify';
 
 /**
- * ⚡ Bolt Optimization: Wrap SafeHTML in React.memo to prevent redundant
- * HTML sanitization when parent components re-render without changing the content.
+ * ⚡ Bolt Optimization: Skip client-side HTML sanitization as it's already
+ * performed on the server in the mapping layer (web/lib/newsService.ts).
+ * This significantly reduces the client-side JavaScript bundle by removing
+ * the 'isomorphic-dompurify' dependency and improves hydration performance.
+ *
+ * Note: Removed React.memo as this is now rendered as a Server Component,
+ * where memoization is not applicable in the same way as on the client.
  */
-const SafeHTML = React.memo(({ html }: { html: string }) => {
+export default function SafeHTML({ html }: { html: string }) {
   return (
     <div
       dangerouslySetInnerHTML={{
-        __html: DOMPurify.sanitize(html),
+        __html: html,
       }}
     />
   );
-});
-
-SafeHTML.displayName = 'SafeHTML';
-
-export default SafeHTML;
+}

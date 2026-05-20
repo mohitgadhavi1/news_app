@@ -57,11 +57,8 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                         <div className="flex flex-wrap items-center gap-6 text-sm text-muted-foreground pt-2">
                             <div className="flex items-center gap-2">
                                 <Calendar className="h-4 w-4" />
-                                {article.publishedAt ? new Date(article.publishedAt).toLocaleDateString(undefined, {
-                                    year: 'numeric',
-                                    month: 'long',
-                                    day: 'numeric'
-                                }) : 'Date unknown'}
+                                {/* ⚡ Bolt Optimization: Use pre-formatted long date from the server to avoid Intl API overhead on the client */}
+                                {article.publishedAtLong || 'Date unknown'}
                             </div>
                             <div className="flex items-center gap-2">
                                 <User className="h-4 w-4" />

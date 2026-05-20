@@ -89,11 +89,11 @@ export default function AccountPage() {
               <div className="w-full mt-2 space-y-2">
                 <div className="flex justify-between py-1 text-sm">
                   <span className="font-medium text-gray-600 dark:text-gray-300">Logged in at:</span>
-                  <span>{formatDate(user.lastLoginAt || user.iat)}</span>
+                  <span>{formatDate((user.lastLoginAt || user.iat) ?? undefined)}</span>
                 </div>
                 <div className="flex justify-between py-1 text-sm">
                   <span className="font-medium text-gray-600 dark:text-gray-300">Login valid till:</span>
-                  <span>{formatDate(user.exp || expiresAt)}</span>
+                  <span>{formatDate((user.exp || expiresAt) ?? undefined)}</span>
                 </div>
               </div>
             </div>
