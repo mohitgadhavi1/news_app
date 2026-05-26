@@ -58,8 +58,8 @@ describe('Security: newsService protections', () => {
     });
 
     describe('mapDocumentToResult', () => {
-        it('should cap content length to 500,000 characters', () => {
-            const longContent = 'A'.repeat(600000);
+        it('should cap content length to 100,000 characters (Bolt Optimization)', () => {
+            const longContent = 'A'.repeat(200000);
             const doc = {
                 _id: 'fake-id' as unknown as never,
                 title: 'Long Article',
@@ -69,8 +69,21 @@ describe('Security: newsService protections', () => {
 
             const result = mapDocumentToResult(doc);
 
-            expect(result.content?.length).toBeLessThanOrEqual(500000 + 50); // Allowing for truncation message
+            expect(result.content?.length).toBeLessThanOrEqual(100000 + 50); // Allowing for truncation message
             expect(result.content).toContain('[content truncated]');
+        });
+
+        it('should correctly extract initials (Bolt Optimization)', () => {
+            const doc = {
+                _id: 'fake-id' as unknown as never,
+                title: '10 Bitcoin Investment Tips',
+                content: 'content',
+                source: 'test-source'
+            };
+
+            const result = mapDocumentToResult(doc);
+            // "10" is ignored, "Bitcoin" -> B, "Investment" -> I
+            expect(result.initials).toBe('BI');
         });
 
         it('should NOT allow javascript: protocol in canonicalUrl', () => {
