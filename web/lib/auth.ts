@@ -14,43 +14,66 @@ export function redirectToLogin() {
 }
 
 export function handleAuthCallback() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const token = urlParams.get('token');
-    const expiresAt = urlParams.get('expiresAt');
-    const uid = urlParams.get('uid');
+    try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get('token');
+        const expiresAt = urlParams.get('expiresAt');
+        const uid = urlParams.get('uid');
 
-    // ✅ Security: Basic validation of parameters
-    if (token && typeof token === 'string' && token.length > 20) {
-        localStorage.setItem(TOKEN_KEY, token);
+        // ✅ Security: Strict length limits and validation of parameters
+        // JWT tokens are usually > 100 chars, but we'll be safe with 21-4096.
+        // UID and expiresAt are also capped to prevent DoS via large localStorage entries.
+        if (token && typeof token === 'string' && token.length > 20 && token.length <= 4096) {
+            localStorage.setItem(TOKEN_KEY, token);
 
-        if (expiresAt && !isNaN(Number(expiresAt))) {
-            localStorage.setItem(EXPIRY_KEY, expiresAt);
+            if (expiresAt && !isNaN(Number(expiresAt)) && expiresAt.length < 32) {
+                localStorage.setItem(EXPIRY_KEY, expiresAt);
+            }
+
+            if (uid && typeof uid === 'string' && uid.length > 0) {
+                if (uid.length <= 128) {
+                    localStorage.setItem(UID_KEY, uid);
+                } else {
+                    return null;
+                }
+            }
+
+            // Clean URL
+            if (typeof window !== 'undefined' && window.history) {
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+            return { token, expiresAt, uid };
         }
-
-        if (uid && typeof uid === 'string' && uid.length > 0) {
-            localStorage.setItem(UID_KEY, uid);
-        }
-
-        // Clean URL
-        window.history.replaceState({}, document.title, window.location.pathname);
-        return { token, expiresAt, uid };
+    } catch (err) {
+        console.error("Auth callback handling failed:", err);
     }
     return null;
 }
 
 export function getStoredAuth() {
-    return {
-        token: typeof window !== 'undefined' ? localStorage.getItem(TOKEN_KEY) : null,
-        expiresAt: typeof window !== 'undefined' ? localStorage.getItem(EXPIRY_KEY) : null,
-        uid: typeof window !== 'undefined' ? localStorage.getItem(UID_KEY) : null,
-    };
+    try {
+        return {
+            token: typeof window !== 'undefined' ? localStorage.getItem(TOKEN_KEY) : null,
+            expiresAt: typeof window !== 'undefined' ? localStorage.getItem(EXPIRY_KEY) : null,
+            uid: typeof window !== 'undefined' ? localStorage.getItem(UID_KEY) : null,
+        };
+    } catch (err) {
+        console.error("Failed to retrieve stored auth:", err);
+        return { token: null, expiresAt: null, uid: null };
+    }
 }
 
 export function logout() {
-    localStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem(EXPIRY_KEY);
-    localStorage.removeItem(UID_KEY);
-    window.location.reload();
+    try {
+        localStorage.removeItem(TOKEN_KEY);
+        localStorage.removeItem(EXPIRY_KEY);
+        localStorage.removeItem(UID_KEY);
+        if (typeof window !== 'undefined') {
+            window.location.reload();
+        }
+    } catch (err) {
+        console.error("Logout failed:", err);
+    }
 }
 
 /**
@@ -59,32 +82,49 @@ export function logout() {
  */
 export function getBasicUserFromUrlOrToken(providedToken?: string) {
     if (typeof window !== "undefined") {
-        const urlParams = new URLSearchParams(window.location.search);
-        const token = urlParams.get("token") || providedToken || getStoredAuth().token || undefined;
-        const email = urlParams.get("email");
-        const name = urlParams.get("name");
-        const rawPicture = urlParams.get("picture");
-        const picture = isValidImageUrl(rawPicture) ? rawPicture : undefined;
-        const uid = urlParams.get("uid") || getStoredAuth().uid;
+        try {
+            const urlParams = new URLSearchParams(window.location.search);
+            const token = urlParams.get("token") || providedToken || getStoredAuth().token || undefined;
+            const email = urlParams.get("email")?.substring(0, 255);
+            const name = urlParams.get("name")?.substring(0, 255);
+            const rawPicture = urlParams.get("picture");
+            const picture = isValidImageUrl(rawPicture) ? rawPicture : undefined;
+            const uid = (urlParams.get("uid") || getStoredAuth().uid)?.substring(0, 128);
 
-        if (token && (email || name || picture || uid)) {
-            return { email, name, picture, uid };
+            if (token && (email || name || picture || uid)) {
+                return { email, name, picture, uid };
+            }
+        } catch (err) {
+            console.error("Failed to parse basic user from URL:", err);
         }
     }
 
     // Try to decode JWT for email/name/picture
     const token = providedToken || getStoredAuth().token;
-    if (token) {
+    if (token && typeof token === 'string' && token.split('.').length === 3) {
         try {
-            const payload = JSON.parse(atob(token.split(".")[1]));
+            // ✅ Security: Robust JWT payload extraction with Unicode support and segment validation
+            const base64Url = token.split(".")[1];
+            const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+            const pad = base64.length % 4;
+            const paddedBase64 = pad ? base64 + "=".repeat(4 - pad) : base64;
+            const jsonPayload = decodeURIComponent(
+                atob(paddedBase64)
+                    .split("")
+                    .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+                    .join("")
+            );
+            const payload = JSON.parse(jsonPayload);
+
             const picture = isValidImageUrl(payload.picture) ? payload.picture : undefined;
             return {
-                email: payload.email || "Details unavailable",
-                name: payload.name || "Unknown User",
+                email: (payload.email || "Details unavailable").substring(0, 255),
+                name: (payload.name || "Unknown User").substring(0, 255),
                 picture,
-                uid: payload.user_id || payload.uid || "Unknown",
+                uid: String(payload.user_id || payload.uid || "Unknown").substring(0, 128),
             };
-        } catch {
+        } catch (err) {
+            console.error("JWT decoding failed:", err);
             return {
                 email: "Details unavailable",
                 name: "Unknown User",

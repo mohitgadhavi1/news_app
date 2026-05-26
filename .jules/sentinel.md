@@ -22,3 +22,8 @@
 **Vulnerability:** Lack of length limits on news content and URLs, combined with missing database timeouts, exposed the application to resource exhaustion (CPU/Memory) and process hanging.
 **Learning:** External data (even from "trusted" news sources) can contain massive payloads that choke sanitization libraries (DOMPurify) or URL parsers. Missing DB timeouts can cause serverless functions or containers to hang indefinitely on network issues.
 **Prevention:** Enforce strict length limits on all external strings before processing (e.g., 500k for content, 2k for URLs). Always configure `connectTimeoutMS` and `serverSelectionTimeoutMS` on database clients.
+
+## 2025-05-20 - [Insecure and Fragile Authentication Logic]
+**Vulnerability:** Authentication parameters lacked length limits, exposing `localStorage` to DoS. JWT decoding was fragile and failed on Unicode characters. Lack of `try...catch` caused crashes in restricted environments (e.g., Private Browsing).
+**Learning:** Authentication boundaries must be resilient to both malicious input (long strings) and restrictive client environments. Standard `atob` is insufficient for JWTs containing non-ASCII characters.
+**Prevention:** Enforce strict length limits on all auth parameters (token, UID). Wrap storage and window interactions in `try...catch`. Use a Unicode-safe Base64URL decoder for JWT payloads.
