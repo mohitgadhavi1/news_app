@@ -87,6 +87,8 @@ export default function NewsPagination({
               className={
                 currentPage === 1 ? "pointer-events-none opacity-50" : ""
               }
+              aria-disabled={currentPage === 1}
+              tabIndex={currentPage === 1 ? -1 : undefined}
             />
           </PaginationItem>
 
@@ -131,6 +133,8 @@ export default function NewsPagination({
                   ? "pointer-events-none opacity-50"
                   : ""
               }
+              aria-disabled={currentPage === totalPages}
+              tabIndex={currentPage === totalPages ? -1 : undefined}
             />
           </PaginationItem>
         </PaginationContent>

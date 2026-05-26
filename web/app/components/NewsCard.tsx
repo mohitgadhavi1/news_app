@@ -184,6 +184,7 @@ export default function NewsCard({ item, index, categorySlug = "all" }: { item: 
                 setIsFlipped(false);
               }}
               tabIndex={isFlipped ? 0 : -1}
+              aria-label="Back to card front"
             >
               Back
             </Button>
@@ -194,6 +195,7 @@ export default function NewsCard({ item, index, categorySlug = "all" }: { item: 
                 asChild
                 onClick={(e) => e.stopPropagation()}
                 tabIndex={isFlipped ? 0 : -1}
+                aria-label={`View full details for: ${item.title}`}
               >
                 <Link href={`/category/${categorySlug}/article/${item.id}`}>
                   View Details
@@ -205,6 +207,7 @@ export default function NewsCard({ item, index, categorySlug = "all" }: { item: 
                 asChild
                 onClick={(e) => e.stopPropagation()}
                 tabIndex={isFlipped ? 0 : -1}
+                aria-label={`Read original article from ${item.source} (opens in new tab)`}
               >
                 <a
                   href={officialUrl}
