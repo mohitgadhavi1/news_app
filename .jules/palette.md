@@ -5,3 +5,7 @@
 ## 2026-04-28 - [Standard A11y: Skip Link]
 **Learning:** Adding a "Skip to content" link as the first focusable element is a high-impact, low-effort micro-UX improvement that significantly benefits power users and those with motor impairments.
 **Action:** Always check for and implement skip links in the root layout of web applications.
+
+## 2026-04-29 - [Pagination Accessibility Pattern]
+**Learning:** For disabled navigation controls (e.g., 'Previous' on the first page), applying `aria-disabled="true"` correctly communicates the state to screen readers, while `tabIndex={-1}` removes them from the keyboard tab order, preventing "dead-end" navigation.
+**Action:** Apply `aria-disabled="true"` and `tabIndex={-1}` to all interactive elements that are visually disabled but remain in the DOM.
