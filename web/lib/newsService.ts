@@ -128,15 +128,13 @@ export function mapDocumentToResult(doc: CryptoNewsDocument): CryptoNewsResult {
     const canonicalUrl = doc.canonicalUrl ?? "";
     const validatedUrl = isValidUrl(canonicalUrl) ? canonicalUrl : "";
 
-    // ⚡ Bolt Optimization: Pre-calculate initials on the server
+    // ⚡ Bolt Optimization: Pre-calculate initials on the server efficiently.
+    // Uses a single-pass regex to extract the first letter of the first two words.
     const initials = (doc.title ?? "")
-        .replace(/[0-9]/g, '')
-        .trim()
-        .split(/\s+/)
-        .filter(word => word.length > 0)
-        .slice(0, 2)
-        .map(word => word[0].toUpperCase())
-        .join('');
+        .match(/\b[a-zA-Z]/g)
+        ?.slice(0, 2)
+        .join('')
+        .toUpperCase() ?? "";
 
     // ⚡ Bolt Optimization: Sanitize HTML on the server and create a plain-text summary
     // to reduce RSC payload size and client-side processing.
@@ -145,7 +143,12 @@ export function mapDocumentToResult(doc: CryptoNewsDocument): CryptoNewsResult {
         ? rawContent.substring(0, 500000) + "... [content truncated]"
         : rawContent;
     const sanitizedContent = DOMPurify.sanitize(contentToSanitize);
+
+    // ⚡ Bolt Optimization: Slice sanitized content BEFORE stripping HTML tags.
+    // Stripping tags from a 500k char string is expensive (O(N)). Slicing to ~2000 chars
+    // first makes the regex operation O(1) relative to total content size.
     const summary = sanitizedContent
+        .substring(0, 2000)
         .replace(/<[^>]*>/g, ' ')
         .replace(/\s+/g, ' ')
         .trim()

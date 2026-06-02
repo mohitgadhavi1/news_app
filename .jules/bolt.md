@@ -19,3 +19,7 @@
 ## 2026-04-21 - [Server-Side Data Pre-processing]
 **Learning:** Offloading string computations (initials, date formatting) and HTML sanitization to the server significantly reduces client-side JS execution and hydration time. Additionally, generating a plain-text summary from HTML on the server reduces the RSC payload size by avoiding sending large HTML strings twice (once as raw content and once as "summary").
 **Action:** Always pre-process display data in the service/mapping layer on the server. Defer rendering of complex UI components (like sanitized HTML blocks) until they are actually needed by the user.
+
+## 2026-05-22 - [Optimized String Processing for Summaries]
+**Learning:** Global regex operations (like tag stripping `/<[^>]*>/g`) on large strings (e.g., 500k chars) are $O(N)$ and can become a major CPU bottleneck when mapping multiple documents. Slicing the string to a small constant length (e.g., 2000 chars) *before* applying the regex reduces complexity to $O(1)$ relative to the total article size.
+**Action:** When generating summaries or excerpts from large HTML/text blocks, always slice the input to a reasonable buffer size before running expensive regex replacements.
