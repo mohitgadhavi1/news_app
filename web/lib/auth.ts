@@ -19,15 +19,19 @@ export function handleAuthCallback() {
     const expiresAt = urlParams.get('expiresAt');
     const uid = urlParams.get('uid');
 
-    // ✅ Security: Basic validation of parameters
-    if (token && typeof token === 'string' && token.length > 20) {
+    // ✅ Security: Strict validation of parameters to prevent DoS or malicious storage
+    const isValidToken = token && typeof token === 'string' && token.length >= 21 && token.length <= 4096;
+    const isValidExpires = expiresAt && typeof expiresAt === 'string' && expiresAt.length < 32 && !isNaN(Number(expiresAt));
+    const isValidUid = uid && typeof uid === 'string' && uid.length > 0 && uid.length <= 128;
+
+    if (isValidToken) {
         localStorage.setItem(TOKEN_KEY, token);
 
-        if (expiresAt && !isNaN(Number(expiresAt))) {
+        if (isValidExpires) {
             localStorage.setItem(EXPIRY_KEY, expiresAt);
         }
 
-        if (uid && typeof uid === 'string' && uid.length > 0) {
+        if (isValidUid) {
             localStorage.setItem(UID_KEY, uid);
         }
 
@@ -61,11 +65,12 @@ export function getBasicUserFromUrlOrToken(providedToken?: string) {
     if (typeof window !== "undefined") {
         const urlParams = new URLSearchParams(window.location.search);
         const token = urlParams.get("token") || providedToken || getStoredAuth().token || undefined;
-        const email = urlParams.get("email");
-        const name = urlParams.get("name");
+        // ✅ Security: Cap length of user-supplied info from URL
+        const email = urlParams.get("email")?.substring(0, 255);
+        const name = urlParams.get("name")?.substring(0, 255);
         const rawPicture = urlParams.get("picture");
         const picture = isValidImageUrl(rawPicture) ? rawPicture : undefined;
-        const uid = urlParams.get("uid") || getStoredAuth().uid;
+        const uid = (urlParams.get("uid") || getStoredAuth().uid)?.substring(0, 255);
 
         if (token && (email || name || picture || uid)) {
             return { email, name, picture, uid };
@@ -74,15 +79,24 @@ export function getBasicUserFromUrlOrToken(providedToken?: string) {
 
     // Try to decode JWT for email/name/picture
     const token = providedToken || getStoredAuth().token;
-    if (token) {
+    // ✅ Security: Validate JWT format (3 segments) before decoding
+    if (token && token.split(".").length === 3) {
         try {
-            const payload = JSON.parse(atob(token.split(".")[1]));
+            // ✅ Security: Unicode-safe Base64URL decoding with padding
+            const base64Url = token.split(".")[1];
+            const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+            const pad = base64.length % 4;
+            const padded = pad ? base64 + "=".repeat(4 - pad) : base64;
+            const payload = JSON.parse(decodeURIComponent(atob(padded).split('').map(function(c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join('')));
+
             const picture = isValidImageUrl(payload.picture) ? payload.picture : undefined;
             return {
-                email: payload.email || "Details unavailable",
-                name: payload.name || "Unknown User",
+                email: (payload.email || "Details unavailable").substring(0, 255),
+                name: (payload.name || "Unknown User").substring(0, 255),
                 picture,
-                uid: payload.user_id || payload.uid || "Unknown",
+                uid: (payload.user_id || payload.uid || "Unknown").substring(0, 255),
             };
         } catch {
             return {
