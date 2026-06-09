@@ -14,43 +14,55 @@ export function redirectToLogin() {
 }
 
 export function handleAuthCallback() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const token = urlParams.get('token');
-    const expiresAt = urlParams.get('expiresAt');
-    const uid = urlParams.get('uid');
+    try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get('token');
+        const expiresAt = urlParams.get('expiresAt');
+        const uid = urlParams.get('uid');
 
-    // ✅ Security: Basic validation of parameters
-    if (token && typeof token === 'string' && token.length > 20) {
-        localStorage.setItem(TOKEN_KEY, token);
+        // ✅ Security: Strict validation and length limits for parameters
+        if (token && typeof token === 'string' && token.length >= 21 && token.length <= 4096) {
+            localStorage.setItem(TOKEN_KEY, token);
 
-        if (expiresAt && !isNaN(Number(expiresAt))) {
-            localStorage.setItem(EXPIRY_KEY, expiresAt);
+            if (expiresAt && typeof expiresAt === 'string' && expiresAt.length < 32 && !isNaN(Number(expiresAt))) {
+                localStorage.setItem(EXPIRY_KEY, expiresAt);
+            }
+
+            if (uid && typeof uid === 'string' && uid.length > 0 && uid.length <= 128) {
+                localStorage.setItem(UID_KEY, uid);
+            }
+
+            // Clean URL
+            window.history.replaceState({}, document.title, window.location.pathname);
+            return { token, expiresAt, uid };
         }
-
-        if (uid && typeof uid === 'string' && uid.length > 0) {
-            localStorage.setItem(UID_KEY, uid);
-        }
-
-        // Clean URL
-        window.history.replaceState({}, document.title, window.location.pathname);
-        return { token, expiresAt, uid };
+    } catch (e) {
+        console.error("Auth callback error:", e);
     }
     return null;
 }
 
 export function getStoredAuth() {
-    return {
-        token: typeof window !== 'undefined' ? localStorage.getItem(TOKEN_KEY) : null,
-        expiresAt: typeof window !== 'undefined' ? localStorage.getItem(EXPIRY_KEY) : null,
-        uid: typeof window !== 'undefined' ? localStorage.getItem(UID_KEY) : null,
-    };
+    try {
+        return {
+            token: typeof window !== 'undefined' ? localStorage.getItem(TOKEN_KEY) : null,
+            expiresAt: typeof window !== 'undefined' ? localStorage.getItem(EXPIRY_KEY) : null,
+            uid: typeof window !== 'undefined' ? localStorage.getItem(UID_KEY) : null,
+        };
+    } catch {
+        return { token: null, expiresAt: null, uid: null };
+    }
 }
 
 export function logout() {
-    localStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem(EXPIRY_KEY);
-    localStorage.removeItem(UID_KEY);
-    window.location.reload();
+    try {
+        localStorage.removeItem(TOKEN_KEY);
+        localStorage.removeItem(EXPIRY_KEY);
+        localStorage.removeItem(UID_KEY);
+        window.location.reload();
+    } catch (e) {
+        console.error("Logout error:", e);
+    }
 }
 
 /**
@@ -59,30 +71,50 @@ export function logout() {
  */
 export function getBasicUserFromUrlOrToken(providedToken?: string) {
     if (typeof window !== "undefined") {
-        const urlParams = new URLSearchParams(window.location.search);
-        const token = urlParams.get("token") || providedToken || getStoredAuth().token || undefined;
-        const email = urlParams.get("email");
-        const name = urlParams.get("name");
-        const rawPicture = urlParams.get("picture");
-        const picture = isValidImageUrl(rawPicture) ? rawPicture : undefined;
-        const uid = urlParams.get("uid") || getStoredAuth().uid;
+        try {
+            const urlParams = new URLSearchParams(window.location.search);
+            const rawToken = urlParams.get("token") || providedToken || getStoredAuth().token || undefined;
+            const token = (rawToken && rawToken.length <= 4096) ? rawToken : undefined;
 
-        if (token && (email || name || picture || uid)) {
-            return { email, name, picture, uid };
+            const email = urlParams.get("email")?.substring(0, 255);
+            const name = urlParams.get("name")?.substring(0, 255);
+            const rawPicture = urlParams.get("picture");
+            const picture = (rawPicture && rawPicture.length <= 2048 && isValidImageUrl(rawPicture)) ? rawPicture : undefined;
+            const uid = (urlParams.get("uid") || getStoredAuth().uid)?.substring(0, 128);
+
+            if (token && (email || name || picture || uid)) {
+                return { email, name, picture, uid };
+            }
+        } catch (e) {
+            console.error("Error extracting basic user info:", e);
         }
     }
 
     // Try to decode JWT for email/name/picture
     const token = providedToken || getStoredAuth().token;
-    if (token) {
+    if (token && typeof token === 'string' && token.length <= 4096) {
         try {
-            const payload = JSON.parse(atob(token.split(".")[1]));
+            const parts = token.split(".");
+            if (parts.length !== 3) return null;
+
+            // Robust Base64URL decoding with padding
+            let base64Payload = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+            while (base64Payload.length % 4 !== 0) base64Payload += "=";
+
+            // Unicode-safe decoding
+            const binaryString = atob(base64Payload);
+            const bytes = new Uint8Array(binaryString.length);
+            for (let i = 0; i < binaryString.length; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            const payload = JSON.parse(new TextDecoder().decode(bytes));
+
             const picture = isValidImageUrl(payload.picture) ? payload.picture : undefined;
             return {
-                email: payload.email || "Details unavailable",
-                name: payload.name || "Unknown User",
+                email: (payload.email?.toString().substring(0, 255)) || "Details unavailable",
+                name: (payload.name?.toString().substring(0, 255)) || "Unknown User",
                 picture,
-                uid: payload.user_id || payload.uid || "Unknown",
+                uid: (payload.user_id || payload.uid || "Unknown").toString().substring(0, 128),
             };
         } catch {
             return {
