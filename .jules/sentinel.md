@@ -22,3 +22,8 @@
 **Vulnerability:** Lack of length limits on news content and URLs, combined with missing database timeouts, exposed the application to resource exhaustion (CPU/Memory) and process hanging.
 **Learning:** External data (even from "trusted" news sources) can contain massive payloads that choke sanitization libraries (DOMPurify) or URL parsers. Missing DB timeouts can cause serverless functions or containers to hang indefinitely on network issues.
 **Prevention:** Enforce strict length limits on all external strings before processing (e.g., 500k for content, 2k for URLs). Always configure `connectTimeoutMS` and `serverSelectionTimeoutMS` on database clients.
+
+## 2025-05-20 - [Insecure Auth Parameter Handling and Brittle JWT Decoding]
+**Vulnerability:** Lack of length limits on authentication parameters (tokens, UIDs) and brittle JWT decoding (using `atob` directly) exposed the app to DoS and potential crashes on malformed/Unicode input.
+**Learning:** Authentication boundaries are high-value targets for resource exhaustion. `atob` alone is insufficient for JWT payloads which may contain Unicode characters or Base64URL encoding variants.
+**Prevention:** Enforce strict length limits on all auth parameters. Use a robust, Unicode-safe decoding pattern (TextDecoder) and handle Base64URL character replacements and padding manually. Wrap all environment-dependent calls (localStorage, window) in try-catch blocks.
