@@ -47,7 +47,7 @@ export interface CryptoNewsResult {
     canonicalUrl?: string | null;
 }
 
-export async function fetchCryptoNews(limit = 12, skip = 0, categoryName?: string) {
+export async function fetchCryptoNews(limit = 12, skip = 0, categoryName?: string, isSnippet: boolean = false) {
     const db = await getDb();
     const col = db.collection<CryptoNewsDocument>("external_news");
 
@@ -87,7 +87,7 @@ export async function fetchCryptoNews(limit = 12, skip = 0, categoryName?: strin
     ]);
 
     return {
-        news: docs.map(mapDocumentToResult),
+        news: docs.map(doc => mapDocumentToResult(doc, isSnippet)),
         total
     };
 }
@@ -123,7 +123,7 @@ export async function fetchArticleById(id: string) {
     return doc ? mapDocumentToResult(doc) : null;
 }
 
-export function mapDocumentToResult(doc: CryptoNewsDocument): CryptoNewsResult {
+export function mapDocumentToResult(doc: CryptoNewsDocument, isSnippet: boolean = false): CryptoNewsResult {
     const rawContent = doc.content ?? doc.contentHtml ?? "";
     const canonicalUrl = doc.canonicalUrl ?? "";
     const validatedUrl = isValidUrl(canonicalUrl) ? canonicalUrl : "";
@@ -141,8 +141,10 @@ export function mapDocumentToResult(doc: CryptoNewsDocument): CryptoNewsResult {
     // ⚡ Bolt Optimization: Sanitize HTML on the server and create a plain-text summary
     // to reduce RSC payload size and client-side processing.
     // ✅ Security: Cap content length to prevent CPU/memory exhaustion during sanitization
-    const contentToSanitize = rawContent.length > 500000
-        ? rawContent.substring(0, 500000) + "... [content truncated]"
+    // ⚡ Bolt Optimization: If it's a snippet (list view), truncate to 2000 chars to reduce RSC payload size.
+    const maxLength = isSnippet ? 2000 : 500000;
+    const contentToSanitize = rawContent.length > maxLength
+        ? rawContent.substring(0, maxLength) + "... [content truncated]"
         : rawContent;
     const sanitizedContent = DOMPurify.sanitize(contentToSanitize);
     const summary = sanitizedContent

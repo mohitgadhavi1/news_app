@@ -45,25 +45,25 @@ describe('News Service Layer', () => {
         it('should calculate skip correctly for page 1', async () => {
             await newsFetchServe(1);
 
-            expect(mockFetchCryptoNews).toHaveBeenCalledWith(12, 0, undefined);
+            expect(mockFetchCryptoNews).toHaveBeenCalledWith(12, 0, undefined, true);
         });
 
         it('should calculate skip correctly for page 2', async () => {
             await newsFetchServe(2);
 
-            expect(mockFetchCryptoNews).toHaveBeenCalledWith(12, 12, undefined);
+            expect(mockFetchCryptoNews).toHaveBeenCalledWith(12, 12, undefined, true);
         });
 
         it('should calculate skip correctly for page 5', async () => {
             await newsFetchServe(5);
 
-            expect(mockFetchCryptoNews).toHaveBeenCalledWith(12, 48, undefined);
+            expect(mockFetchCryptoNews).toHaveBeenCalledWith(12, 48, undefined, true);
         });
 
         it('should default to page 1 when no page provided', async () => {
             await newsFetchServe(1);
 
-            expect(mockFetchCryptoNews).toHaveBeenCalledWith(12, 0, undefined);
+            expect(mockFetchCryptoNews).toHaveBeenCalledWith(12, 0, undefined, true);
         });
 
         it('should calculate total pages correctly', async () => {
@@ -161,13 +161,13 @@ describe('News Service Layer', () => {
             // Page 0 should be treated as 1
             await newsFetchServe(0);
 
-            expect(mockFetchCryptoNews).toHaveBeenCalledWith(12, 0, undefined);
+            expect(mockFetchCryptoNews).toHaveBeenCalledWith(12, 0, undefined, true);
         });
 
         it('should handle negative page numbers by defaulting to 1', async () => {
             await newsFetchServe(-1);
 
-            expect(mockFetchCryptoNews).toHaveBeenCalledWith(12, 0, undefined);
+            expect(mockFetchCryptoNews).toHaveBeenCalledWith(12, 0, undefined, true);
         });
     });
 
@@ -176,14 +176,14 @@ describe('News Service Layer', () => {
             await newsFetchServe(1000);
 
             // Capped at 500: (500 - 1) * 12 = 5988
-            expect(mockFetchCryptoNews).toHaveBeenCalledWith(12, 5988, undefined);
+            expect(mockFetchCryptoNews).toHaveBeenCalledWith(12, 5988, undefined, true);
         });
 
         it('should handle page number as float by floor validation', async () => {
             await newsFetchServe(2.5);
 
             // Should calculate skip based on floor(2.5) = 2
-            expect(mockFetchCryptoNews).toHaveBeenCalledWith(12, 12, undefined);
+            expect(mockFetchCryptoNews).toHaveBeenCalledWith(12, 12, undefined, true);
         });
 
         it('should handle large total counts', async () => {
