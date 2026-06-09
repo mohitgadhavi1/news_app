@@ -21,7 +21,8 @@ export async function newsFetchServe(page: number, categoryName?: string): Promi
 
 
     // ✅ Let errors throw naturally for Next.js error boundaries to catch
-    const result = await fetchCryptoNews(ITEMS_PER_PAGE, skip, categoryName);
+    // ⚡ Bolt Optimization: Request snippets for list views to reduce RSC payload size.
+    const result = await fetchCryptoNews(ITEMS_PER_PAGE, skip, categoryName, true);
 
     const totalPages = Math.ceil(result.total / ITEMS_PER_PAGE);
 
