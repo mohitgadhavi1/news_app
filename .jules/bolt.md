@@ -19,3 +19,7 @@
 ## 2026-04-21 - [Server-Side Data Pre-processing]
 **Learning:** Offloading string computations (initials, date formatting) and HTML sanitization to the server significantly reduces client-side JS execution and hydration time. Additionally, generating a plain-text summary from HTML on the server reduces the RSC payload size by avoiding sending large HTML strings twice (once as raw content and once as "summary").
 **Action:** Always pre-process display data in the service/mapping layer on the server. Defer rendering of complex UI components (like sanitized HTML blocks) until they are actually needed by the user.
+
+## 2026-04-25 - [RSC Payload and CPU Optimization for List Views]
+**Learning:** Even with server-side pre-processing, sending full article content in a list view significantly inflates the RSC payload and increases server-side CPU load during sanitization. Truncating the source content to a small threshold (e.g., 2000 chars) *before* sanitization and summary generation for list views provides a double win: reduced processing time and smaller network transfer.
+**Action:** Implement a `snippet` or `isSnippet` flag in data mapping layers to conditionally truncate content when full details are not required for the current view. Always slice large strings before applying global regex operations to maintain O(1) performance relative to document size.
