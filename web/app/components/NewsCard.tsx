@@ -210,6 +210,7 @@ export default function NewsCard({ item, index, categorySlug = "all" }: { item: 
                   href={officialUrl}
                   target="_blank"
                   rel="noopener noreferrer"
+                  aria-label="Read original article (opens in new tab)"
                 >
                   Original
                   <ExternalLink className="ml-1.5 h-3.5 w-3.5" />

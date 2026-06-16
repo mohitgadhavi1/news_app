@@ -101,6 +101,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="flex items-center gap-2"
+                                aria-label="Read original article (opens in new tab)"
                             >
                                 Read Original Article
                                 <ExternalLink className="h-4 w-4" />
