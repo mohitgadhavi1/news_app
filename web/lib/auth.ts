@@ -19,16 +19,18 @@ export function handleAuthCallback() {
     const expiresAt = urlParams.get('expiresAt');
     const uid = urlParams.get('uid');
 
-    // ✅ Security: Basic validation of parameters
-    if (token && typeof token === 'string' && token.length > 20) {
-        localStorage.setItem(TOKEN_KEY, token);
+    // ✅ Security: Strict length limits to prevent DoS via massive URL parameters
+    const isValidToken = typeof token === 'string' && token.length >= 21 && token.length <= 4096;
+    const isValidExpires = !expiresAt || (typeof expiresAt === 'string' && expiresAt.length < 32 && !isNaN(Number(expiresAt)));
+    const isValidUid = !uid || (typeof uid === 'string' && uid.length >= 1 && uid.length <= 128);
 
-        if (expiresAt && !isNaN(Number(expiresAt))) {
-            localStorage.setItem(EXPIRY_KEY, expiresAt);
-        }
-
-        if (uid && typeof uid === 'string' && uid.length > 0) {
-            localStorage.setItem(UID_KEY, uid);
+    if (isValidToken && isValidExpires && isValidUid) {
+        try {
+            localStorage.setItem(TOKEN_KEY, token);
+            if (expiresAt) localStorage.setItem(EXPIRY_KEY, expiresAt);
+            if (uid) localStorage.setItem(UID_KEY, uid);
+        } catch (e) {
+            console.error("Auth callback: Failed to save to localStorage", e);
         }
 
         // Clean URL
@@ -39,18 +41,32 @@ export function handleAuthCallback() {
 }
 
 export function getStoredAuth() {
-    return {
-        token: typeof window !== 'undefined' ? localStorage.getItem(TOKEN_KEY) : null,
-        expiresAt: typeof window !== 'undefined' ? localStorage.getItem(EXPIRY_KEY) : null,
-        uid: typeof window !== 'undefined' ? localStorage.getItem(UID_KEY) : null,
-    };
+    if (typeof window === 'undefined') {
+        return { token: null, expiresAt: null, uid: null };
+    }
+    try {
+        return {
+            token: localStorage.getItem(TOKEN_KEY),
+            expiresAt: localStorage.getItem(EXPIRY_KEY),
+            uid: localStorage.getItem(UID_KEY),
+        };
+    } catch (e) {
+        console.error("Failed to get auth from localStorage", e);
+        return { token: null, expiresAt: null, uid: null };
+    }
 }
 
 export function logout() {
-    localStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem(EXPIRY_KEY);
-    localStorage.removeItem(UID_KEY);
-    window.location.reload();
+    if (typeof window !== 'undefined') {
+        try {
+            localStorage.removeItem(TOKEN_KEY);
+            localStorage.removeItem(EXPIRY_KEY);
+            localStorage.removeItem(UID_KEY);
+        } catch (e) {
+            console.error("Logout: Failed to clear localStorage", e);
+        }
+        window.location.reload();
+    }
 }
 
 /**
@@ -61,11 +77,12 @@ export function getBasicUserFromUrlOrToken(providedToken?: string) {
     if (typeof window !== "undefined") {
         const urlParams = new URLSearchParams(window.location.search);
         const token = urlParams.get("token") || providedToken || getStoredAuth().token || undefined;
-        const email = urlParams.get("email");
-        const name = urlParams.get("name");
+        // ✅ Security: Cap URL parameter lengths to prevent DoS/Memory exhaustion
+        const email = urlParams.get("email")?.substring(0, 255) || null;
+        const name = urlParams.get("name")?.substring(0, 255) || null;
         const rawPicture = urlParams.get("picture");
         const picture = isValidImageUrl(rawPicture) ? rawPicture : undefined;
-        const uid = urlParams.get("uid") || getStoredAuth().uid;
+        const uid = urlParams.get("uid")?.substring(0, 255) || getStoredAuth().uid;
 
         if (token && (email || name || picture || uid)) {
             return { email, name, picture, uid };
@@ -74,15 +91,26 @@ export function getBasicUserFromUrlOrToken(providedToken?: string) {
 
     // Try to decode JWT for email/name/picture
     const token = providedToken || getStoredAuth().token;
-    if (token) {
+    if (token && typeof token === 'string') {
         try {
-            const payload = JSON.parse(atob(token.split(".")[1]));
+            const segments = token.split(".");
+            if (segments.length !== 3) throw new Error("Invalid JWT segments");
+
+            // ✅ Security: Unicode-safe Base64URL decoding with padding
+            const base64 = segments[1].replace(/-/g, "+").replace(/_/g, "/");
+            const pad = base64.length % 4;
+            const padded = pad ? base64 + "=".repeat(4 - pad) : base64;
+            const payload = JSON.parse(decodeURIComponent(atob(padded).split('').map(function (c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join('')));
+
             const picture = isValidImageUrl(payload.picture) ? payload.picture : undefined;
             return {
-                email: payload.email || "Details unavailable",
-                name: payload.name || "Unknown User",
+                email: (typeof payload.email === 'string' ? payload.email.substring(0, 255) : null) || "Details unavailable",
+                name: (typeof payload.name === 'string' ? payload.name.substring(0, 255) : null) || "Unknown User",
                 picture,
-                uid: payload.user_id || payload.uid || "Unknown",
+                uid: (typeof payload.user_id === 'string' ? payload.user_id.substring(0, 255) :
+                    typeof payload.uid === 'string' ? payload.uid.substring(0, 255) : null) || "Unknown",
             };
         } catch {
             return {
