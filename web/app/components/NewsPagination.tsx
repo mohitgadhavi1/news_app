@@ -84,6 +84,8 @@ export default function NewsPagination({
                 e.preventDefault();
                 handlePageChange(Math.max(1, currentPage - 1));
               }}
+              aria-disabled={currentPage === 1 ? "true" : undefined}
+              tabIndex={currentPage === 1 ? -1 : 0}
               className={
                 currentPage === 1 ? "pointer-events-none opacity-50" : ""
               }
@@ -126,6 +128,8 @@ export default function NewsPagination({
                 e.preventDefault();
                 handlePageChange(Math.min(totalPages, currentPage + 1));
               }}
+              aria-disabled={currentPage === totalPages ? "true" : undefined}
+              tabIndex={currentPage === totalPages ? -1 : 0}
               className={
                 currentPage === totalPages
                   ? "pointer-events-none opacity-50"
