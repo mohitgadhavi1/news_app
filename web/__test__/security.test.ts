@@ -1,5 +1,7 @@
 
+
 // Mock variables must start with 'mock' to be used in jest.mock() and are hoisted
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const mockFind = jest.fn().mockReturnValue({
     project: jest.fn().mockReturnThis(),
     sort: jest.fn().mockReturnThis(),
@@ -7,8 +9,11 @@ const mockFind = jest.fn().mockReturnValue({
     limit: jest.fn().mockReturnThis(),
     toArray: jest.fn().mockResolvedValue([]),
 });
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const mockCountDocuments = jest.fn().mockResolvedValue(0);
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const mockEstimatedDocumentCount = jest.fn().mockResolvedValue(0);
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const mockAggregate = jest.fn().mockReturnValue({
     toArray: jest.fn().mockResolvedValue([]),
 });
@@ -58,7 +63,7 @@ describe('Security: newsService protections', () => {
     });
 
     describe('mapDocumentToResult', () => {
-        it('should cap content length to 500,000 characters', () => {
+        it('should cap content length to 500,000 characters by default', () => {
             const longContent = 'A'.repeat(600000);
             const doc = {
                 _id: 'fake-id' as unknown as never,
@@ -71,6 +76,45 @@ describe('Security: newsService protections', () => {
 
             expect(result.content?.length).toBeLessThanOrEqual(500000 + 50); // Allowing for truncation message
             expect(result.content).toContain('[content truncated]');
+        });
+
+        it('should cap content length more aggressively in snippet mode', () => {
+            const longContent = 'A'.repeat(5000);
+            const doc = {
+                _id: 'fake-id' as unknown as never,
+                title: 'Long Article',
+                content: longContent,
+                source: 'test-source'
+            };
+
+            const result = mapDocumentToResult(doc, true);
+
+            expect(result.content?.length).toBeLessThanOrEqual(2000 + 5);
+            expect(result.content?.endsWith('...')).toBe(true);
+        });
+
+        it('should generate initials correctly using regex', () => {
+            const doc = {
+                _id: 'fake-id' as unknown as never,
+                title: 'Bitcoin Price Surge 2025',
+                content: 'content',
+                source: 'test-source'
+            };
+
+            const result = mapDocumentToResult(doc);
+            expect(result.initials).toBe('BP');
+        });
+
+        it('should handle non-ASCII characters for initials', () => {
+            const doc = {
+                _id: 'fake-id' as unknown as never,
+                title: 'Кириллица Новости',
+                content: 'content',
+                source: 'test-source'
+            };
+
+            const result = mapDocumentToResult(doc);
+            expect(result.initials).toBe('КН');
         });
 
         it('should NOT allow javascript: protocol in canonicalUrl', () => {
