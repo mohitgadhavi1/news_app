@@ -87,7 +87,7 @@ export async function fetchCryptoNews(limit = 12, skip = 0, categoryName?: strin
     ]);
 
     return {
-        news: docs.map(mapDocumentToResult),
+        news: docs.map(doc => mapDocumentToResult(doc, true)),
         total
     };
 }
@@ -123,29 +123,33 @@ export async function fetchArticleById(id: string) {
     return doc ? mapDocumentToResult(doc) : null;
 }
 
-export function mapDocumentToResult(doc: CryptoNewsDocument): CryptoNewsResult {
+export function mapDocumentToResult(doc: CryptoNewsDocument, isSnippet = false): CryptoNewsResult {
     const rawContent = doc.content ?? doc.contentHtml ?? "";
     const canonicalUrl = doc.canonicalUrl ?? "";
     const validatedUrl = isValidUrl(canonicalUrl) ? canonicalUrl : "";
 
-    // ⚡ Bolt Optimization: Pre-calculate initials on the server
-    const initials = (doc.title ?? "")
-        .replace(/[0-9]/g, '')
-        .trim()
-        .split(/\s+/)
-        .filter(word => word.length > 0)
+    // ⚡ Bolt Optimization: Pre-calculate initials on the server using single-pass Unicode-aware regex.
+    // Note: \b is not reliable for non-ASCII characters in all JS environments.
+    const initials = ((doc.title ?? "").match(/(?:^|\s)\p{L}/gu) || [])
         .slice(0, 2)
-        .map(word => word[0].toUpperCase())
-        .join('');
+        .map(s => s.trim())
+        .join('')
+        .toUpperCase();
 
     // ⚡ Bolt Optimization: Sanitize HTML on the server and create a plain-text summary
     // to reduce RSC payload size and client-side processing.
-    // ✅ Security: Cap content length to prevent CPU/memory exhaustion during sanitization
-    const contentToSanitize = rawContent.length > 500000
-        ? rawContent.substring(0, 500000) + "... [content truncated]"
+    // ✅ Security: Cap content length to prevent CPU/memory exhaustion during sanitization.
+    // When in snippet mode (for list views), we cap more aggressively to 2000 chars.
+    const maxLength = isSnippet ? 2000 : 500000;
+    const contentToSanitize = rawContent.length > maxLength
+        ? rawContent.substring(0, maxLength) + (isSnippet ? "..." : "... [content truncated]")
         : rawContent;
     const sanitizedContent = DOMPurify.sanitize(contentToSanitize);
-    const summary = sanitizedContent
+
+    // ⚡ Bolt Optimization: Truncate sanitized content before summary regex operations
+    // to reduce CPU load from global replacements on large strings.
+    // Buffer increased to 2000 chars to minimize broken tag fragments.
+    const summary = sanitizedContent.substring(0, 2000)
         .replace(/<[^>]*>/g, ' ')
         .replace(/\s+/g, ' ')
         .trim()
